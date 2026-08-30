@@ -119,6 +119,11 @@ export const planUpload = createServerFn({ method: "POST" })
       accountLabel: decision.account.label,
       reason: decision.reason,
       real: provider.real,
+      transport: provider.real
+        ? decision.account.provider === "google-drive"
+          ? ("drive" as const)
+          : ("supabase" as const)
+        : ("mock" as const),
       bucket: "nexdrive",
       storageKey,
     };
