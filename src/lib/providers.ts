@@ -36,8 +36,8 @@ export const PROVIDERS: ProviderMeta[] = [
     id: "google-drive",
     name: "Google Drive",
     kind: "oauth",
-    blurb: "OAuth 2.0 · Drive v3 files API with resumable uploads.",
-    real: false,
+    blurb: "OAuth 2.0 · real Drive v3 uploads, downloads and live quota.",
+    real: true,
     defaultQuota: 15 * GB,
   },
   {
