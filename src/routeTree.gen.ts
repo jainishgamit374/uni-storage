@@ -18,6 +18,7 @@ import { Route as AuthenticatedQuotaRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedUploadsRouteImport } from './routes/_authenticated/uploads'
 import { Route as AuthenticatedSettingsPolicyRouteImport } from './routes/_authenticated/settings.policy'
 import { Route as AuthenticatedSettingsProvidersRouteImport } from './routes/_authenticated/settings.providers'
+import { Route as ApiPublicOauthGoogleCallbackRouteImport } from './routes/api/public/oauth/google/callback'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -65,6 +66,12 @@ const AuthenticatedSettingsProvidersRoute =
     path: '/settings/providers',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiPublicOauthGoogleCallbackRoute =
+  ApiPublicOauthGoogleCallbackRouteImport.update({
+    id: '/api/public/oauth/google/callback',
+    path: '/api/public/oauth/google/callback',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -75,6 +82,7 @@ export interface FileRoutesByFullPath {
   '/uploads': typeof AuthenticatedUploadsRoute
   '/settings/policy': typeof AuthenticatedSettingsPolicyRoute
   '/settings/providers': typeof AuthenticatedSettingsProvidersRoute
+  '/api/public/oauth/google/callback': typeof ApiPublicOauthGoogleCallbackRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -85,6 +93,7 @@ export interface FileRoutesByTo {
   '/uploads': typeof AuthenticatedUploadsRoute
   '/settings/policy': typeof AuthenticatedSettingsPolicyRoute
   '/settings/providers': typeof AuthenticatedSettingsProvidersRoute
+  '/api/public/oauth/google/callback': typeof ApiPublicOauthGoogleCallbackRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -97,6 +106,7 @@ export interface FileRoutesById {
   '/_authenticated/uploads': typeof AuthenticatedUploadsRoute
   '/_authenticated/settings/policy': typeof AuthenticatedSettingsPolicyRoute
   '/_authenticated/settings/providers': typeof AuthenticatedSettingsProvidersRoute
+  '/api/public/oauth/google/callback': typeof ApiPublicOauthGoogleCallbackRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -109,6 +119,7 @@ export interface FileRouteTypes {
     | '/uploads'
     | '/settings/policy'
     | '/settings/providers'
+    | '/api/public/oauth/google/callback'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -119,6 +130,7 @@ export interface FileRouteTypes {
     | '/uploads'
     | '/settings/policy'
     | '/settings/providers'
+    | '/api/public/oauth/google/callback'
   id:
     | '__root__'
     | '/'
@@ -130,12 +142,14 @@ export interface FileRouteTypes {
     | '/_authenticated/uploads'
     | '/_authenticated/settings/policy'
     | '/_authenticated/settings/providers'
+    | '/api/public/oauth/google/callback'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ApiPublicOauthGoogleCallbackRoute: typeof ApiPublicOauthGoogleCallbackRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -203,6 +217,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsProvidersRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/oauth/google/callback': {
+      id: '/api/public/oauth/google/callback'
+      path: '/api/public/oauth/google/callback'
+      fullPath: '/api/public/oauth/google/callback'
+      preLoaderRoute: typeof ApiPublicOauthGoogleCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -231,6 +252,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ApiPublicOauthGoogleCallbackRoute: ApiPublicOauthGoogleCallbackRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
