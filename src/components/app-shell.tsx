@@ -15,6 +15,7 @@ import { useQueryClient } from "@tanstack/react-query";
 
 import { DriveAssistant } from "@/components/drive-assistant";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { UploadDialog } from "@/components/upload-dialog";
 import { supabase } from "@/integrations/supabase/client";
@@ -126,6 +127,7 @@ export function AppShell({
 
           <div className="flex items-center gap-2">
             {actions}
+            <ThemeToggle />
             <UploadDialog />
           </div>
         </header>

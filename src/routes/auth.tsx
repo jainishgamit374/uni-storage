@@ -3,6 +3,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -91,7 +92,8 @@ function AuthPage() {
 
   return (
     <div className="grid-backdrop flex min-h-screen items-center justify-center px-4 py-12">
-      <div className="panel w-full max-w-md p-6">
+      <div className="panel relative w-full max-w-md p-6">
+        <ThemeToggle className="absolute right-4 top-4" />
         <div className="flex items-center gap-2.5">
           <span className="text-numeric flex size-9 items-center justify-center rounded-md bg-primary text-sm font-bold text-primary-foreground">
             N

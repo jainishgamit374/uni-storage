@@ -2,7 +2,7 @@
 @source "../src";
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark (&:where(.dark, .dark *));
 
 /*
  * NexDrive design system — editorial studio light.
@@ -132,8 +132,70 @@
   --sidebar-ring: oklch(0.48 0.26 268);
 }
 
+/*
+ * Optional dark theme — the "ink console" palette.
+ * Light editorial is the default; users opt in via the theme toggle,
+ * which sets .dark on <html>.
+ */
 .dark {
-  color-scheme: light;
+  color-scheme: dark;
+
+  --background: oklch(0.145 0.005 285);
+  --foreground: oklch(0.92 0.004 286);
+
+  --surface: oklch(0.195 0.006 285);
+  --surface-raised: oklch(0.26 0.007 285);
+  --grid-line: oklch(0.325 0.008 285 / 70%);
+
+  --card: oklch(0.195 0.006 285);
+  --card-foreground: oklch(0.92 0.004 286);
+  --popover: oklch(0.195 0.006 285);
+  --popover-foreground: oklch(0.92 0.004 286);
+
+  /* Electric blue reads light on ink, so button text flips to near-black. */
+  --primary: oklch(0.66 0.185 259);
+  --primary-foreground: oklch(0.145 0.005 285);
+
+  --secondary: oklch(0.26 0.007 285);
+  --secondary-foreground: oklch(0.92 0.004 286);
+
+  --muted: oklch(0.26 0.007 285);
+  --muted-foreground: oklch(0.72 0.012 286);
+
+  --accent: oklch(0.3 0.04 265);
+  --accent-foreground: oklch(0.88 0.09 258);
+
+  --destructive: oklch(0.65 0.2 25);
+  --destructive-foreground: oklch(0.15 0.02 25);
+  --success: oklch(0.74 0.17 152);
+  --success-foreground: oklch(0.15 0.03 155);
+  --warning: oklch(0.82 0.15 78);
+  --warning-foreground: oklch(0.18 0.04 70);
+
+  --lime: oklch(0.867 0.2 128);
+  --lime-foreground: oklch(0.17 0.05 130);
+
+  --ink: oklch(0.195 0.006 285);
+  --ink-foreground: oklch(0.92 0.004 286);
+
+  --border: oklch(0.325 0.008 285);
+  --input: oklch(0.325 0.008 285);
+  --ring: oklch(0.66 0.185 259);
+
+  --chart-1: oklch(0.66 0.185 259);
+  --chart-2: oklch(0.75 0.13 250);
+  --chart-3: oklch(0.867 0.2 128);
+  --chart-4: oklch(0.74 0.17 152);
+  --chart-5: oklch(0.82 0.15 78);
+
+  --sidebar: oklch(0.195 0.006 285);
+  --sidebar-foreground: oklch(0.92 0.004 286);
+  --sidebar-primary: oklch(0.66 0.185 259);
+  --sidebar-primary-foreground: oklch(0.145 0.005 285);
+  --sidebar-accent: oklch(0.26 0.007 285);
+  --sidebar-accent-foreground: oklch(0.88 0.09 258);
+  --sidebar-border: oklch(0.325 0.008 285);
+  --sidebar-ring: oklch(0.66 0.185 259);
 }
 
 @layer base {
@@ -144,6 +206,7 @@
   html {
     color-scheme: light;
   }
+
 
   body {
     background-color: var(--color-background);
