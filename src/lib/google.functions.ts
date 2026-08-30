@@ -37,7 +37,7 @@ export const startGoogleConnect = createServerFn({ method: "POST" })
     ]);
     const origin = originFromRequest();
     const state = signPayload({ u: context.userId, n: randomNonce() }, 600);
-    return { url: buildAuthUrl(origin, state) };
+    return { url: await buildAuthUrl(origin, state) };
   });
 
 async function ownedGoogleAccount(
