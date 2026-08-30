@@ -14,7 +14,190 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      connected_accounts: {
+        Row: {
+          config: Json
+          created_at: string
+          id: string
+          is_mock: boolean
+          label: string
+          priority: number
+          provider: string
+          quota_total: number
+          quota_used: number
+          status: string
+          user_id: string
+        }
+        Insert: {
+          config?: Json
+          created_at?: string
+          id?: string
+          is_mock?: boolean
+          label: string
+          priority?: number
+          provider: string
+          quota_total?: number
+          quota_used?: number
+          status?: string
+          user_id: string
+        }
+        Update: {
+          config?: Json
+          created_at?: string
+          id?: string
+          is_mock?: boolean
+          label?: string
+          priority?: number
+          provider?: string
+          quota_total?: number
+          quota_used?: number
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+        }
+        Relationships: []
+      }
+      routing_policies: {
+        Row: {
+          folder_rules: Json
+          mode: string
+          type_rules: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          folder_rules?: Json
+          mode?: string
+          type_rules?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          folder_rules?: Json
+          mode?: string
+          type_rules?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      stored_files: {
+        Row: {
+          account_id: string | null
+          created_at: string
+          folder_path: string
+          id: string
+          is_mock: boolean
+          mime_type: string
+          name: string
+          size: number
+          storage_key: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_id?: string | null
+          created_at?: string
+          folder_path?: string
+          id?: string
+          is_mock?: boolean
+          mime_type?: string
+          name: string
+          size?: number
+          storage_key?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_id?: string | null
+          created_at?: string
+          folder_path?: string
+          id?: string
+          is_mock?: boolean
+          mime_type?: string
+          name?: string
+          size?: number
+          storage_key?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stored_files_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "connected_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      upload_jobs: {
+        Row: {
+          account_id: string | null
+          created_at: string
+          error: string | null
+          file_name: string
+          id: string
+          progress: number
+          routed_by: string | null
+          size: number
+          status: string
+          user_id: string
+        }
+        Insert: {
+          account_id?: string | null
+          created_at?: string
+          error?: string | null
+          file_name: string
+          id?: string
+          progress?: number
+          routed_by?: string | null
+          size?: number
+          status?: string
+          user_id: string
+        }
+        Update: {
+          account_id?: string | null
+          created_at?: string
+          error?: string | null
+          file_name?: string
+          id?: string
+          progress?: number
+          routed_by?: string | null
+          size?: number
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "upload_jobs_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "connected_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
