@@ -135,18 +135,18 @@ async function tokenRequest(body: Record<string, string>): Promise<TokenResponse
 }
 
 export async function exchangeCode(code: string, origin: string) {
-  const { clientId, clientSecret } = googleCredentials();
+  const { clientId, clientSecret, redirectUri: configured } = await googleCredentials();
   return tokenRequest({
     code,
     client_id: clientId,
     client_secret: clientSecret,
-    redirect_uri: redirectUri(origin),
+    redirect_uri: configured || defaultRedirectUri(origin),
     grant_type: "authorization_code",
   });
 }
 
 export async function refreshAccessToken(refreshToken: string) {
-  const { clientId, clientSecret } = googleCredentials();
+  const { clientId, clientSecret } = await googleCredentials();
   return tokenRequest({
     refresh_token: refreshToken,
     client_id: clientId,
