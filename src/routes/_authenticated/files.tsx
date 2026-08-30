@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { Download, MoreHorizontal, Search, Trash2 } from "lucide-react";
+import { Download, FolderSearch, MoreHorizontal, Search, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { AppShell } from "@/components/app-shell";
@@ -22,7 +22,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/empty-state";
+import { HintTip } from "@/components/hint-tip";
+import { TableSkeleton } from "@/components/skeletons";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { deleteFile, getDownloadUrl } from "@/lib/nexdrive.functions";
 import { fileKind, formatBytes, formatRelative } from "@/lib/format";
@@ -97,6 +99,11 @@ function FilesPage() {
 
   return (
     <AppShell title="Files" description="Every object the gateway knows about, in one table.">
+      <HintTip id="files" title="One table, every provider" className="mb-4">
+        Filter by provider or file type, then use the row menu to download or delete. Ask Nex, the
+        assistant in the corner, to find anything by name, size or provider.
+      </HintTip>
+
       <div className="panel p-4">
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative min-w-56 flex-1">
@@ -135,15 +142,18 @@ function FilesPage() {
 
         <div className="mt-4 overflow-x-auto">
           {isLoading ? (
-            <div className="space-y-2">
-              {[0, 1, 2, 3].map((i) => (
-                <Skeleton key={i} className="h-12" />
-              ))}
-            </div>
+            <TableSkeleton rows={5} />
           ) : rows.length === 0 ? (
-            <p className="py-12 text-center text-sm text-muted-foreground">
-              No files match these filters.
-            </p>
+            <EmptyState
+              icon={FolderSearch}
+              title={data && data.files.length === 0 ? "Your gateway is empty" : "No files match"}
+              description={
+                data && data.files.length === 0
+                  ? "Upload a file and the routing engine will place it on the best backend automatically."
+                  : "Nothing matched these filters. Widen the file type or switch provider."
+              }
+              hints={["Route by file type", "Search across providers", "Ask Nex for a file"]}
+            />
           ) : (
             <table className="w-full min-w-[720px] text-sm">
               <thead>
@@ -161,7 +171,7 @@ function FilesPage() {
                   const account = data?.accounts.find((a) => a.id === f.account_id);
                   const provider = account?.provider ?? "s3";
                   return (
-                    <tr key={f.id} className="border-b border-border/60 last:border-0">
+                    <tr key={f.id} className="row-interactive border-b border-border/60 last:border-0">
                       <td className="py-3 pr-4">
                         <div className="flex items-center gap-2">
                           <span className="truncate font-medium">{f.name}</span>
