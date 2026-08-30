@@ -4,6 +4,7 @@ import {
   Files,
   Gauge,
   History,
+  KeyRound,
   LayoutDashboard,
   LogOut,
   Menu,
