@@ -1,7 +1,15 @@
 import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { Download, FolderSearch, MoreHorizontal, Search, Trash2 } from "lucide-react";
+import {
+  Download,
+  FolderInput,
+  FolderSearch,
+  MoreHorizontal,
+  Pencil,
+  Search,
+  Trash2,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { AppShell } from "@/components/app-shell";
@@ -27,6 +35,15 @@ import { HintTip } from "@/components/hint-tip";
 import { TableSkeleton } from "@/components/skeletons";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { deleteFile, getDownloadUrl } from "@/lib/nexdrive.functions";
+import { moveStoredFile, renameStoredFile } from "@/lib/google.functions";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import { fileKind, formatBytes, formatRelative } from "@/lib/format";
 import { providerMeta } from "@/lib/providers";
 import { useOverview, useRefreshOverview } from "@/lib/use-overview";
@@ -56,6 +73,29 @@ function FilesPage() {
   const refresh = useRefreshOverview();
   const remove = useServerFn(deleteFile);
   const download = useServerFn(getDownloadUrl);
+  const rename = useServerFn(renameStoredFile);
+  const move = useServerFn(moveStoredFile);
+
+  const [edit, setEdit] = useState<{ id: string; mode: "rename" | "move"; value: string } | null>(
+    null,
+  );
+  const [saving, setSaving] = useState(false);
+
+  async function saveEdit() {
+    if (!edit) return;
+    setSaving(true);
+    try {
+      if (edit.mode === "rename") await rename({ data: { id: edit.id, name: edit.value.trim() } });
+      else await move({ data: { id: edit.id, folderPath: edit.value.trim() || "/" } });
+      await refresh();
+      toast.success(edit.mode === "rename" ? "File renamed" : "File moved");
+      setEdit(null);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Update failed");
+    } finally {
+      setSaving(false);
+    }
+  }
 
   const [query, setQuery] = useState("");
   const [kind, setKind] = useState<string>("all");
@@ -212,6 +252,20 @@ function FilesPage() {
                               <Download className="size-4" /> Download
                             </DropdownMenuItem>
                             <DropdownMenuItem
+                              onClick={() =>
+                                setEdit({ id: f.id, mode: "rename", value: f.name })
+                              }
+                            >
+                              <Pencil className="size-4" /> Rename
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() =>
+                                setEdit({ id: f.id, mode: "move", value: f.folder_path })
+                              }
+                            >
+                              <FolderInput className="size-4" /> Move
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
                               onClick={() => onDelete(f.id, f.name)}
                               className="text-destructive focus:text-destructive"
                             >
@@ -228,6 +282,33 @@ function FilesPage() {
           )}
         </div>
       </div>
+
+      <Dialog open={!!edit} onOpenChange={(o) => !o && setEdit(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{edit?.mode === "rename" ? "Rename file" : "Move file"}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Label htmlFor="file-edit-value">
+              {edit?.mode === "rename" ? "New name" : "Destination folder"}
+            </Label>
+            <Input
+              id="file-edit-value"
+              value={edit?.value ?? ""}
+              onChange={(e) => setEdit((s) => (s ? { ...s, value: e.target.value } : s))}
+              className={edit?.mode === "move" ? "text-numeric" : undefined}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setEdit(null)}>
+              Cancel
+            </Button>
+            <Button onClick={saveEdit} disabled={saving || !edit?.value.trim()}>
+              {saving ? "Saving…" : "Save"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AppShell>
   );
 }

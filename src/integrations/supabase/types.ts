@@ -18,43 +18,99 @@ export type Database = {
         Row: {
           config: Json
           created_at: string
+          external_email: string | null
+          external_id: string | null
           id: string
           is_mock: boolean
           label: string
+          needs_reauth: boolean
           priority: number
           provider: string
           quota_total: number
           quota_used: number
+          root_folder_id: string | null
           status: string
           user_id: string
         }
         Insert: {
           config?: Json
           created_at?: string
+          external_email?: string | null
+          external_id?: string | null
           id?: string
           is_mock?: boolean
           label: string
+          needs_reauth?: boolean
           priority?: number
           provider: string
           quota_total?: number
           quota_used?: number
+          root_folder_id?: string | null
           status?: string
           user_id: string
         }
         Update: {
           config?: Json
           created_at?: string
+          external_email?: string | null
+          external_id?: string | null
           id?: string
           is_mock?: boolean
           label?: string
+          needs_reauth?: boolean
           priority?: number
           provider?: string
           quota_total?: number
           quota_used?: number
+          root_folder_id?: string | null
           status?: string
           user_id?: string
         }
         Relationships: []
+      }
+      oauth_credentials: {
+        Row: {
+          access_token_ciphertext: string | null
+          account_id: string
+          created_at: string
+          id: string
+          provider: string
+          refresh_token_ciphertext: string | null
+          token_expiry: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_token_ciphertext?: string | null
+          account_id: string
+          created_at?: string
+          id?: string
+          provider: string
+          refresh_token_ciphertext?: string | null
+          token_expiry?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_token_ciphertext?: string | null
+          account_id?: string
+          created_at?: string
+          id?: string
+          provider?: string
+          refresh_token_ciphertext?: string | null
+          token_expiry?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "oauth_credentials_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: true
+            referencedRelation: "connected_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
