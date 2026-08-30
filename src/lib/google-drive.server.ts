@@ -25,30 +25,82 @@ export class ReauthRequiredError extends Error {
   }
 }
 
-export function googleCredentials() {
+/**
+ * Global OAuth app configuration, n8n-style: an administrator saves the client
+ * id/secret once (encrypted in `oauth_provider_config`), every user just clicks
+ * Connect. Project secrets remain a fallback for headless setups.
+ */
+export interface GoogleOAuthConfig {
+  clientId: string;
+  clientSecret: string;
+  redirectUri: string | null;
+  source: "database" | "env";
+}
+
+async function storedConfig(): Promise<GoogleOAuthConfig | null> {
+  try {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data } = await supabaseAdmin
+      .from("oauth_provider_config")
+      .select("client_id_ciphertext, client_secret_ciphertext, redirect_uri")
+      .eq("provider", GOOGLE_PROVIDER_ID)
+      .maybeSingle();
+    if (!data) return null;
+    return {
+      clientId: decryptToken(data.client_id_ciphertext),
+      clientSecret: decryptToken(data.client_secret_ciphertext),
+      redirectUri: data.redirect_uri ?? null,
+      source: "database",
+    };
+  } catch {
+    return null;
+  }
+}
+
+function envConfig(): GoogleOAuthConfig | null {
   const clientId = process.env["GOOGLE_CLIENT_ID"];
   const clientSecret = process.env["GOOGLE_CLIENT_SECRET"];
-  if (!clientId || !clientSecret) {
+  if (!clientId || !clientSecret) return null;
+  return {
+    clientId,
+    clientSecret,
+    redirectUri: process.env["GOOGLE_REDIRECT_URI"] ?? null,
+    source: "env",
+  };
+}
+
+export async function googleConfig(): Promise<GoogleOAuthConfig | null> {
+  return (await storedConfig()) ?? envConfig();
+}
+
+export async function googleCredentials(): Promise<GoogleOAuthConfig> {
+  const config = await googleConfig();
+  if (!config) {
     throw new Error(
-      "Google OAuth is not configured yet. Add GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in Project Settings → Secrets.",
+      "Google OAuth is not configured yet. An administrator must save the Client ID and Client Secret in Settings → Google OAuth.",
     );
   }
-  return { clientId, clientSecret };
+  return config;
 }
 
-export function googleConfigured() {
-  return Boolean(process.env["GOOGLE_CLIENT_ID"] && process.env["GOOGLE_CLIENT_SECRET"]);
+export async function googleConfigured() {
+  return (await googleConfig()) !== null;
 }
 
-export function redirectUri(origin: string) {
-  return process.env["GOOGLE_REDIRECT_URI"] || `${origin}/api/public/oauth/google/callback`;
+export function defaultRedirectUri(origin: string) {
+  return `${origin}/api/public/oauth/google/callback`;
 }
 
-export function buildAuthUrl(origin: string, state: string) {
-  const { clientId } = googleCredentials();
+export async function redirectUri(origin: string) {
+  const config = await googleConfig();
+  return config?.redirectUri || defaultRedirectUri(origin);
+}
+
+export async function buildAuthUrl(origin: string, state: string) {
+  const { clientId, redirectUri: configured } = await googleCredentials();
   const params = new URLSearchParams({
     client_id: clientId,
-    redirect_uri: redirectUri(origin),
+    redirect_uri: configured || defaultRedirectUri(origin),
     response_type: "code",
     scope: GOOGLE_SCOPES.join(" "),
     access_type: "offline",
@@ -58,6 +110,7 @@ export function buildAuthUrl(origin: string, state: string) {
   });
   return `${AUTH_URL}?${params.toString()}`;
 }
+
 
 interface TokenResponse {
   access_token: string;
@@ -82,18 +135,18 @@ async function tokenRequest(body: Record<string, string>): Promise<TokenResponse
 }
 
 export async function exchangeCode(code: string, origin: string) {
-  const { clientId, clientSecret } = googleCredentials();
+  const { clientId, clientSecret, redirectUri: configured } = await googleCredentials();
   return tokenRequest({
     code,
     client_id: clientId,
     client_secret: clientSecret,
-    redirect_uri: redirectUri(origin),
+    redirect_uri: configured || defaultRedirectUri(origin),
     grant_type: "authorization_code",
   });
 }
 
 export async function refreshAccessToken(refreshToken: string) {
-  const { clientId, clientSecret } = googleCredentials();
+  const { clientId, clientSecret } = await googleCredentials();
   return tokenRequest({
     refresh_token: refreshToken,
     client_id: clientId,

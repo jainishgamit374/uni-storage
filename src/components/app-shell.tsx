@@ -4,6 +4,7 @@ import {
   Files,
   Gauge,
   History,
+  KeyRound,
   LayoutDashboard,
   LogOut,
   Menu,
@@ -28,6 +29,7 @@ const NAV = [
   { to: "/quota", label: "Quota", icon: Gauge },
   { to: "/settings/providers", label: "Providers", icon: PlugZap, group: "Settings" },
   { to: "/settings/policy", label: "Routing policy", icon: RouteIcon },
+  { to: "/settings/oauth", label: "Google OAuth", icon: KeyRound },
 ] as const;
 
 function NavLinks({ onNavigate }: { onNavigate?: () => void }) {

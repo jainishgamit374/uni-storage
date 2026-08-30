@@ -10,13 +10,22 @@ function originFromRequest() {
   return new URL(getRequest().url).origin;
 }
 
-/** Reports whether Google OAuth secrets are present, without leaking values. */
+/** Reports whether Google OAuth is configured, without leaking any values. */
 export const googleOauthStatus = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async () => {
+  .handler(async ({ context }) => {
     const { googleConfigured, redirectUri } = await import("./google-drive.server");
-    return { configured: googleConfigured(), redirectUri: redirectUri(originFromRequest()) };
+    const { data: isAdmin } = await context.supabase.rpc("has_role", {
+      _user_id: context.userId,
+      _role: "admin",
+    });
+    return {
+      configured: await googleConfigured(),
+      redirectUri: await redirectUri(originFromRequest()),
+      isAdmin: Boolean(isAdmin),
+    };
   });
+
 
 /** Builds the real Google consent URL with a CSRF-safe, expiring signed state. */
 export const startGoogleConnect = createServerFn({ method: "POST" })
@@ -28,7 +37,7 @@ export const startGoogleConnect = createServerFn({ method: "POST" })
     ]);
     const origin = originFromRequest();
     const state = signPayload({ u: context.userId, n: randomNonce() }, 600);
-    return { url: buildAuthUrl(origin, state) };
+    return { url: await buildAuthUrl(origin, state) };
   });
 
 async function ownedGoogleAccount(
