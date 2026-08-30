@@ -26,7 +26,7 @@ const NAV = [
   { to: "/files", label: "Files", icon: Files },
   { to: "/uploads", label: "Uploads", icon: History },
   { to: "/quota", label: "Quota", icon: Gauge },
-  { to: "/settings/providers", label: "Providers", icon: PlugZap },
+  { to: "/settings/providers", label: "Providers", icon: PlugZap, group: "Settings" },
   { to: "/settings/policy", label: "Routing policy", icon: RouteIcon },
 ] as const;
 
@@ -34,7 +34,9 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   return (
     <nav className="space-y-1">
-      {NAV.map(({ to, label, icon: Icon }) => {
+      {NAV.map((item) => {
+        const { to, label, icon: Icon } = item;
+
         const active = pathname === to;
         return (
           <Link
