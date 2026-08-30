@@ -12,10 +12,13 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as RegisterRouteImport } from './routes/register'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedFilesRouteImport } from './routes/_authenticated/files'
 import { Route as AuthenticatedQuotaRouteImport } from './routes/_authenticated/quota'
 import { Route as AuthenticatedUploadsRouteImport } from './routes/_authenticated/uploads'
+import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authenticated/settings.index'
 import { Route as AuthenticatedSettingsPolicyRouteImport } from './routes/_authenticated/settings.policy'
 import { Route as AuthenticatedSettingsProvidersRouteImport } from './routes/_authenticated/settings.providers'
 import { Route as ApiPublicDriveDownloadRouteImport } from './routes/api/public/drive/download'
@@ -33,6 +36,16 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
@@ -55,6 +68,12 @@ const AuthenticatedUploadsRoute = AuthenticatedUploadsRouteImport.update({
   path: '/uploads',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedSettingsIndexRoute =
+  AuthenticatedSettingsIndexRouteImport.update({
+    id: '/settings/',
+    path: '/settings/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedSettingsPolicyRoute =
   AuthenticatedSettingsPolicyRouteImport.update({
     id: '/settings/policy',
@@ -82,24 +101,30 @@ const ApiPublicOauthGoogleCallbackRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/login': typeof LoginRoute
+  '/register': typeof RegisterRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/files': typeof AuthenticatedFilesRoute
   '/quota': typeof AuthenticatedQuotaRoute
   '/uploads': typeof AuthenticatedUploadsRoute
   '/settings/policy': typeof AuthenticatedSettingsPolicyRoute
   '/settings/providers': typeof AuthenticatedSettingsProvidersRoute
+  '/settings/': typeof AuthenticatedSettingsIndexRoute
   '/api/public/drive/download': typeof ApiPublicDriveDownloadRoute
   '/api/public/oauth/google/callback': typeof ApiPublicOauthGoogleCallbackRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/login': typeof LoginRoute
+  '/register': typeof RegisterRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/files': typeof AuthenticatedFilesRoute
   '/quota': typeof AuthenticatedQuotaRoute
   '/uploads': typeof AuthenticatedUploadsRoute
   '/settings/policy': typeof AuthenticatedSettingsPolicyRoute
   '/settings/providers': typeof AuthenticatedSettingsProvidersRoute
+  '/settings': typeof AuthenticatedSettingsIndexRoute
   '/api/public/drive/download': typeof ApiPublicDriveDownloadRoute
   '/api/public/oauth/google/callback': typeof ApiPublicOauthGoogleCallbackRoute
 }
@@ -108,12 +133,15 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/login': typeof LoginRoute
+  '/register': typeof RegisterRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/files': typeof AuthenticatedFilesRoute
   '/_authenticated/quota': typeof AuthenticatedQuotaRoute
   '/_authenticated/uploads': typeof AuthenticatedUploadsRoute
   '/_authenticated/settings/policy': typeof AuthenticatedSettingsPolicyRoute
   '/_authenticated/settings/providers': typeof AuthenticatedSettingsProvidersRoute
+  '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
   '/api/public/drive/download': typeof ApiPublicDriveDownloadRoute
   '/api/public/oauth/google/callback': typeof ApiPublicOauthGoogleCallbackRoute
 }
@@ -122,24 +150,30 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/login'
+    | '/register'
     | '/dashboard'
     | '/files'
     | '/quota'
     | '/uploads'
     | '/settings/policy'
     | '/settings/providers'
+    | '/settings/'
     | '/api/public/drive/download'
     | '/api/public/oauth/google/callback'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
+    | '/login'
+    | '/register'
     | '/dashboard'
     | '/files'
     | '/quota'
     | '/uploads'
     | '/settings/policy'
     | '/settings/providers'
+    | '/settings'
     | '/api/public/drive/download'
     | '/api/public/oauth/google/callback'
   id:
@@ -147,12 +181,15 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/login'
+    | '/register'
     | '/_authenticated/dashboard'
     | '/_authenticated/files'
     | '/_authenticated/quota'
     | '/_authenticated/uploads'
     | '/_authenticated/settings/policy'
     | '/_authenticated/settings/providers'
+    | '/_authenticated/settings/'
     | '/api/public/drive/download'
     | '/api/public/oauth/google/callback'
   fileRoutesById: FileRoutesById
@@ -161,6 +198,8 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  LoginRoute: typeof LoginRoute
+  RegisterRoute: typeof RegisterRoute
   ApiPublicDriveDownloadRoute: typeof ApiPublicDriveDownloadRoute
   ApiPublicOauthGoogleCallbackRoute: typeof ApiPublicOauthGoogleCallbackRoute
 }
@@ -186,6 +225,20 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/dashboard': {
@@ -214,6 +267,13 @@ declare module '@tanstack/react-router' {
       path: '/uploads'
       fullPath: '/uploads'
       preLoaderRoute: typeof AuthenticatedUploadsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/settings/': {
+      id: '/_authenticated/settings/'
+      path: '/settings'
+      fullPath: '/settings/'
+      preLoaderRoute: typeof AuthenticatedSettingsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/settings/policy': {
@@ -254,6 +314,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedUploadsRoute: typeof AuthenticatedUploadsRoute
   AuthenticatedSettingsPolicyRoute: typeof AuthenticatedSettingsPolicyRoute
   AuthenticatedSettingsProvidersRoute: typeof AuthenticatedSettingsProvidersRoute
+  AuthenticatedSettingsIndexRoute: typeof AuthenticatedSettingsIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -263,6 +324,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedUploadsRoute: AuthenticatedUploadsRoute,
   AuthenticatedSettingsPolicyRoute: AuthenticatedSettingsPolicyRoute,
   AuthenticatedSettingsProvidersRoute: AuthenticatedSettingsProvidersRoute,
+  AuthenticatedSettingsIndexRoute: AuthenticatedSettingsIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -272,6 +334,8 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  LoginRoute: LoginRoute,
+  RegisterRoute: RegisterRoute,
   ApiPublicDriveDownloadRoute: ApiPublicDriveDownloadRoute,
   ApiPublicOauthGoogleCallbackRoute: ApiPublicOauthGoogleCallbackRoute,
 }
