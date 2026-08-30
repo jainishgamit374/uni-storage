@@ -1,11 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { CheckCircle2, CircleAlert, Loader2 } from "lucide-react";
+import { CheckCircle2, CircleAlert, Loader2, UploadCloud } from "lucide-react";
 
 import { AppShell } from "@/components/app-shell";
 import { ProviderGlyph } from "@/components/provider-glyph";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/empty-state";
+import { HintTip } from "@/components/hint-tip";
+import { TableSkeleton } from "@/components/skeletons";
 import { formatBytes, formatRelative } from "@/lib/format";
 import { useOverview } from "@/lib/use-overview";
 
@@ -52,22 +54,28 @@ function UploadsPage() {
 
   return (
     <AppShell title="Uploads" description="Routing decisions, byte counts and outcomes.">
+      <HintTip id="uploads" title="See why each file landed where it did" className="mb-4">
+        Every row shows the destination backend and the rule that chose it. Change the rules any
+        time under Routing policy.
+      </HintTip>
+
       <div className="panel divide-y divide-border">
         {isLoading ? (
-          <div className="space-y-2 p-4">
-            {[0, 1, 2].map((i) => (
-              <Skeleton key={i} className="h-14" />
-            ))}
+          <div className="p-4">
+            <TableSkeleton rows={4} />
           </div>
         ) : (data?.jobs.length ?? 0) === 0 ? (
-          <p className="p-12 text-center text-sm text-muted-foreground">
-            No uploads yet. Every routed upload will be logged here.
-          </p>
+          <EmptyState
+            icon={UploadCloud}
+            title="No routed uploads yet"
+            description="Send your first file through the gateway and the routing decision will be logged here."
+            hints={["Most-available", "Round-robin", "File-type rules"]}
+          />
         ) : (
           data!.jobs.map((job) => {
             const account = data!.accounts.find((a) => a.id === job.account_id);
             return (
-              <div key={job.id} className="flex flex-wrap items-center gap-3 p-4">
+              <div key={job.id} className="row-interactive flex flex-wrap items-center gap-3 p-4">
                 <ProviderGlyph provider={account?.provider ?? "s3"} />
                 <div className="min-w-48 flex-1">
                   <p className="truncate text-sm font-medium">{job.file_name}</p>

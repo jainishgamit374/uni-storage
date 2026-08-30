@@ -4,7 +4,8 @@ import { AppShell } from "@/components/app-shell";
 import { ProviderGlyph } from "@/components/provider-glyph";
 import { QuotaBar } from "@/components/quota-bar";
 import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
+import { CardGridSkeleton, Shimmer } from "@/components/skeletons";
+import { HintTip } from "@/components/hint-tip";
 import { formatBytes } from "@/lib/format";
 import { providerMeta } from "@/lib/providers";
 import { useOverview } from "@/lib/use-overview";
@@ -35,11 +36,19 @@ function QuotaPage() {
 
   return (
     <AppShell title="Quota" description="Headroom per backend, and the pooled total.">
+      <HintTip id="quota" title="Headroom drives the router" className="mb-4">
+        In most-available mode the gateway always writes to the backend with the most free space.
+        Bars turn amber past 70% and red past 90%.
+      </HintTip>
+
       {isLoading ? (
-        <Skeleton className="h-64" />
+        <div className="space-y-4">
+          <Shimmer className="h-32 rounded-xl" />
+          <CardGridSkeleton />
+        </div>
       ) : (
         <>
-          <div className="panel p-5">
+          <div className="panel panel-interactive p-5">
             <p className="text-xs uppercase tracking-wider text-muted-foreground">Pooled storage</p>
             <p className="text-numeric mt-2 text-3xl font-semibold">
               {formatBytes(used)}{" "}
@@ -53,7 +62,7 @@ function QuotaPage() {
               const meta = providerMeta(a.provider);
               const free = Number(a.quota_total) - Number(a.quota_used);
               return (
-                <div key={a.id} className="panel p-5">
+                <div key={a.id} className="panel panel-interactive stagger-in p-5">
                   <div className="flex items-center gap-3">
                     <ProviderGlyph provider={a.provider} />
                     <div className="min-w-0 flex-1">

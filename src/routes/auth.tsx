@@ -55,7 +55,7 @@ function AuthPage() {
   async function signUp(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -68,8 +68,14 @@ function AuthPage() {
       toast.error(error.message);
       return;
     }
+    if (data.session) {
+      toast.success("Welcome to NexDrive");
+      navigate({ to: "/dashboard" });
+      return;
+    }
     toast.success("Account created", { description: "You can sign in now." });
   }
+
 
   async function google() {
     const result = await lovable.auth.signInWithOAuth("google", {

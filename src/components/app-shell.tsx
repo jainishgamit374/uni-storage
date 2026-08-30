@@ -11,6 +11,9 @@ import {
   Route as RouteIcon,
 } from "lucide-react";
 
+import { useQueryClient } from "@tanstack/react-query";
+
+import { DriveAssistant } from "@/components/drive-assistant";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { UploadDialog } from "@/components/upload-dialog";
@@ -38,8 +41,9 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
             to={to}
             onClick={onNavigate}
             className={cn(
-              "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-              active && "bg-sidebar-accent text-primary",
+              "relative flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-all duration-200 hover:translate-x-0.5 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+              active &&
+                "bg-sidebar-accent text-primary before:absolute before:left-0 before:top-1/2 before:h-5 before:w-1 before:-translate-y-1/2 before:rounded-full before:bg-lime",
             )}
           >
             <Icon className="size-4" />
@@ -75,14 +79,17 @@ export function AppShell({
 }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   async function signOut() {
+    await queryClient.cancelQueries();
+    queryClient.clear();
     await supabase.auth.signOut();
-    navigate({ to: "/" });
+    navigate({ to: "/auth", replace: true });
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-dvh bg-background">
       <aside className="fixed inset-y-0 left-0 hidden w-60 flex-col border-r border-sidebar-border bg-sidebar p-3 lg:flex">
         <Brand />
         <div className="mt-6 flex-1">
@@ -125,6 +132,8 @@ export function AppShell({
 
         <main className="px-4 py-6 sm:px-6">{children}</main>
       </div>
+
+      <DriveAssistant />
     </div>
   );
 }
