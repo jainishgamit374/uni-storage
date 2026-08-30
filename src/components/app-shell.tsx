@@ -26,7 +26,7 @@ const NAV = [
   { to: "/files", label: "Files", icon: Files },
   { to: "/uploads", label: "Uploads", icon: History },
   { to: "/quota", label: "Quota", icon: Gauge },
-  { to: "/settings/providers", label: "Providers", icon: PlugZap },
+  { to: "/settings/providers", label: "Providers", icon: PlugZap, group: "Settings" },
   { to: "/settings/policy", label: "Routing policy", icon: RouteIcon },
 ] as const;
 
@@ -34,23 +34,32 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   return (
     <nav className="space-y-1">
-      {NAV.map(({ to, label, icon: Icon }) => {
+      {NAV.map((item) => {
+        const { to, label, icon: Icon } = item;
+        const group = "group" in item ? (item.group as string) : undefined;
         const active = pathname === to;
         return (
-          <Link
-            key={to}
-            to={to}
-            onClick={onNavigate}
-            className={cn(
-              "relative flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-all duration-200 hover:translate-x-0.5 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
-              active &&
-                "bg-sidebar-accent text-primary before:absolute before:left-0 before:top-1/2 before:h-5 before:w-1 before:-translate-y-1/2 before:rounded-full before:bg-lime",
-            )}
-          >
-            <Icon className="size-4" />
-            {label}
-          </Link>
+          <div key={to}>
+            {group ? (
+              <p className="mt-5 mb-1 px-3 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground/70">
+                {group}
+              </p>
+            ) : null}
+            <Link
+              to={to}
+              onClick={onNavigate}
+              className={cn(
+                "relative flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-all duration-200 hover:translate-x-0.5 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+                active &&
+                  "bg-sidebar-accent text-primary before:absolute before:left-0 before:top-1/2 before:h-5 before:w-1 before:-translate-y-1/2 before:rounded-full before:bg-lime",
+              )}
+            >
+              <Icon className="size-4" />
+              {label}
+            </Link>
+          </div>
         );
+
       })}
     </nav>
   );
