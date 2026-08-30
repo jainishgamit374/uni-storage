@@ -1,13 +1,11 @@
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
 /** Shimmering placeholder block matching the console surface tokens. */
 export function Shimmer({ className }: { className?: string }) {
-  return (
-    <div className={cn("relative overflow-hidden rounded-md bg-muted", className)}>
-      <div className="shimmer-surface absolute inset-0" />
-    </div>
-  );
+  return <Skeleton className={cn(className)} />;
 }
+
 
 export function TableSkeleton({ rows = 5 }: { rows?: number }) {
   return (
