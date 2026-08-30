@@ -19,6 +19,7 @@ import { Route as AuthenticatedFilesRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedQuotaRouteImport } from './routes/_authenticated/quota'
 import { Route as AuthenticatedUploadsRouteImport } from './routes/_authenticated/uploads'
 import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authenticated/settings.index'
+import { Route as AuthenticatedSettingsOauthRouteImport } from './routes/_authenticated/settings.oauth'
 import { Route as AuthenticatedSettingsPolicyRouteImport } from './routes/_authenticated/settings.policy'
 import { Route as AuthenticatedSettingsProvidersRouteImport } from './routes/_authenticated/settings.providers'
 import { Route as ApiPublicDriveDownloadRouteImport } from './routes/api/public/drive/download'
@@ -74,6 +75,12 @@ const AuthenticatedSettingsIndexRoute =
     path: '/settings/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedSettingsOauthRoute =
+  AuthenticatedSettingsOauthRouteImport.update({
+    id: '/settings/oauth',
+    path: '/settings/oauth',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedSettingsPolicyRoute =
   AuthenticatedSettingsPolicyRouteImport.update({
     id: '/settings/policy',
@@ -107,6 +114,7 @@ export interface FileRoutesByFullPath {
   '/files': typeof AuthenticatedFilesRoute
   '/quota': typeof AuthenticatedQuotaRoute
   '/uploads': typeof AuthenticatedUploadsRoute
+  '/settings/oauth': typeof AuthenticatedSettingsOauthRoute
   '/settings/policy': typeof AuthenticatedSettingsPolicyRoute
   '/settings/providers': typeof AuthenticatedSettingsProvidersRoute
   '/settings/': typeof AuthenticatedSettingsIndexRoute
@@ -122,6 +130,7 @@ export interface FileRoutesByTo {
   '/files': typeof AuthenticatedFilesRoute
   '/quota': typeof AuthenticatedQuotaRoute
   '/uploads': typeof AuthenticatedUploadsRoute
+  '/settings/oauth': typeof AuthenticatedSettingsOauthRoute
   '/settings/policy': typeof AuthenticatedSettingsPolicyRoute
   '/settings/providers': typeof AuthenticatedSettingsProvidersRoute
   '/settings': typeof AuthenticatedSettingsIndexRoute
@@ -139,6 +148,7 @@ export interface FileRoutesById {
   '/_authenticated/files': typeof AuthenticatedFilesRoute
   '/_authenticated/quota': typeof AuthenticatedQuotaRoute
   '/_authenticated/uploads': typeof AuthenticatedUploadsRoute
+  '/_authenticated/settings/oauth': typeof AuthenticatedSettingsOauthRoute
   '/_authenticated/settings/policy': typeof AuthenticatedSettingsPolicyRoute
   '/_authenticated/settings/providers': typeof AuthenticatedSettingsProvidersRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
@@ -156,6 +166,7 @@ export interface FileRouteTypes {
     | '/files'
     | '/quota'
     | '/uploads'
+    | '/settings/oauth'
     | '/settings/policy'
     | '/settings/providers'
     | '/settings/'
@@ -171,6 +182,7 @@ export interface FileRouteTypes {
     | '/files'
     | '/quota'
     | '/uploads'
+    | '/settings/oauth'
     | '/settings/policy'
     | '/settings/providers'
     | '/settings'
@@ -187,6 +199,7 @@ export interface FileRouteTypes {
     | '/_authenticated/files'
     | '/_authenticated/quota'
     | '/_authenticated/uploads'
+    | '/_authenticated/settings/oauth'
     | '/_authenticated/settings/policy'
     | '/_authenticated/settings/providers'
     | '/_authenticated/settings/'
@@ -276,6 +289,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/settings/oauth': {
+      id: '/_authenticated/settings/oauth'
+      path: '/settings/oauth'
+      fullPath: '/settings/oauth'
+      preLoaderRoute: typeof AuthenticatedSettingsOauthRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/settings/policy': {
       id: '/_authenticated/settings/policy'
       path: '/settings/policy'
@@ -312,6 +332,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedFilesRoute: typeof AuthenticatedFilesRoute
   AuthenticatedQuotaRoute: typeof AuthenticatedQuotaRoute
   AuthenticatedUploadsRoute: typeof AuthenticatedUploadsRoute
+  AuthenticatedSettingsOauthRoute: typeof AuthenticatedSettingsOauthRoute
   AuthenticatedSettingsPolicyRoute: typeof AuthenticatedSettingsPolicyRoute
   AuthenticatedSettingsProvidersRoute: typeof AuthenticatedSettingsProvidersRoute
   AuthenticatedSettingsIndexRoute: typeof AuthenticatedSettingsIndexRoute
@@ -322,6 +343,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedFilesRoute: AuthenticatedFilesRoute,
   AuthenticatedQuotaRoute: AuthenticatedQuotaRoute,
   AuthenticatedUploadsRoute: AuthenticatedUploadsRoute,
+  AuthenticatedSettingsOauthRoute: AuthenticatedSettingsOauthRoute,
   AuthenticatedSettingsPolicyRoute: AuthenticatedSettingsPolicyRoute,
   AuthenticatedSettingsProvidersRoute: AuthenticatedSettingsProvidersRoute,
   AuthenticatedSettingsIndexRoute: AuthenticatedSettingsIndexRoute,
