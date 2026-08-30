@@ -9,7 +9,7 @@ export const chartPalette = {
   success: "var(--success)",
   warning: "var(--warning)",
   danger: "var(--destructive)",
-  grid: "color-mix(in oklab, var(--border) 70%, transparent)",
+  grid: "color-mix(in oklab, var(--border) 40%, transparent)",
   tooltipBg: "var(--popover)",
   tooltipFg: "var(--popover-foreground)",
 } as const;

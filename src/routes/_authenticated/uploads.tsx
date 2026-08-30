@@ -32,14 +32,14 @@ export const Route = createFileRoute("/_authenticated/uploads")({
 function StatusPill({ status }: { status: string }) {
   if (status === "complete")
     return (
-      <Badge className="gap-1 bg-success text-success-foreground">
-        <CheckCircle2 className="size-3" /> complete
+      <Badge variant="success">
+        <CheckCircle2 className="size-3" aria-hidden="true" /> complete
       </Badge>
     );
   if (status === "failed")
     return (
-      <Badge variant="destructive" className="gap-1">
-        <CircleAlert className="size-3" /> failed
+      <Badge variant="danger">
+        <CircleAlert className="size-3" aria-hidden="true" /> failed
       </Badge>
     );
   return (
