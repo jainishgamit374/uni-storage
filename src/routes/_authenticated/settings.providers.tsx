@@ -61,7 +61,9 @@ function ProvidersPage() {
     const outcome = params.get("google");
     if (!outcome) return;
     if (outcome === "connected") {
-      toast.success(`Google Drive connected${params.get("email") ? ` — ${params.get("email")}` : ""}`);
+      toast.success(
+        `Google Drive connected${params.get("email") ? ` — ${params.get("email")}` : ""}`,
+      );
       void refresh();
     } else {
       toast.error("Google Drive connection failed", {
@@ -120,7 +122,6 @@ function ProvidersPage() {
           provider: target.id,
           label: label.trim() || target.name,
           quotaTotal: target.defaultQuota,
-          isMock: !target.real,
           config: {},
         },
       });
@@ -198,7 +199,8 @@ function ProvidersPage() {
                         disabled={syncing === a.id}
                         onClick={() => onSyncQuota(a.id)}
                       >
-                        <RefreshCw className="size-4" /> {syncing === a.id ? "Syncing…" : "Sync quota"}
+                        <RefreshCw className="size-4" />{" "}
+                        {syncing === a.id ? "Syncing…" : "Sync quota"}
                       </Button>
                       {a.needs_reauth && (
                         <Button variant="outline" size="sm" onClick={() => connectGoogle()}>
@@ -223,9 +225,7 @@ function ProvidersPage() {
                 <ProviderGlyph provider={p.id} />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium">{p.name}</p>
-                  <p className="text-xs uppercase tracking-wider text-muted-foreground">
-                    {p.kind}
-                  </p>
+                  <p className="text-xs uppercase tracking-wider text-muted-foreground">{p.kind}</p>
                 </div>
               </div>
               <p className="mt-3 flex-1 text-sm text-muted-foreground">{p.blurb}</p>

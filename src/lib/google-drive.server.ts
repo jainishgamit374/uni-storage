@@ -1,4 +1,5 @@
 import { decryptToken, encryptToken } from "./token-crypto.server";
+import { escapeDriveQueryLiteral, normalizeFolderPath } from "./validation";
 
 /** Server-only Google Drive adapter + OAuth plumbing. */
 
@@ -110,7 +111,6 @@ export async function buildAuthUrl(origin: string, state: string) {
   });
   return `${AUTH_URL}?${params.toString()}`;
 }
-
 
 interface TokenResponse {
   access_token: string;
@@ -242,6 +242,14 @@ async function markNeedsReauth(accountId: string) {
  * stored one is expired. Throws ReauthRequiredError (after flagging the row)
  * when the refresh token is revoked or missing.
  */
+function safeDecrypt(ciphertext: string): string | null {
+  try {
+    return decryptToken(ciphertext);
+  } catch {
+    return null;
+  }
+}
+
 export async function getAccessToken(accountId: string): Promise<string> {
   const db = await admin();
   const { data, error } = await db
@@ -257,15 +265,26 @@ export async function getAccessToken(accountId: string): Promise<string> {
 
   const expiry = data.token_expiry ? new Date(data.token_expiry).getTime() : 0;
   const stillValid = data.access_token_ciphertext && expiry - Date.now() > 60_000;
-  if (stillValid) return decryptToken(data.access_token_ciphertext!);
+  if (stillValid) {
+    const cached = safeDecrypt(data.access_token_ciphertext!);
+    if (cached) return cached;
+  }
 
   if (!data.refresh_token_ciphertext) {
     await markNeedsReauth(accountId);
     throw new ReauthRequiredError();
   }
 
+  const refreshSecret = safeDecrypt(data.refresh_token_ciphertext);
+  if (!refreshSecret) {
+    // Encryption key rotated or ciphertext corrupted: ask for a reconnect
+    // instead of surfacing a crypto stack trace.
+    await markNeedsReauth(accountId);
+    throw new ReauthRequiredError("Stored Google credentials could not be read. Reconnect.");
+  }
+
   try {
-    const refreshed = await refreshAccessToken(decryptToken(data.refresh_token_ciphertext));
+    const refreshed = await refreshAccessToken(refreshSecret);
     await saveCredentials({
       userId: data.user_id,
       accountId,
@@ -289,14 +308,45 @@ export async function getAccessToken(accountId: string): Promise<string> {
 /* Drive v3 API                                                                */
 /* -------------------------------------------------------------------------- */
 
-async function driveFetch(token: string, url: string, init: RequestInit = {}) {
-  const res = await fetch(url, {
-    ...init,
-    headers: { Authorization: `Bearer ${token}`, ...(init.headers ?? {}) },
-  });
+const DRIVE_TIMEOUT_MS = 30_000;
+
+/**
+ * Every Drive call goes through here: bounded by a timeout so a hung provider
+ * cannot hold a worker open, and retried once on 429/5xx/network blips.
+ */
+async function driveFetch(
+  token: string,
+  url: string,
+  init: RequestInit = {},
+  attempt = 0,
+): Promise<Response> {
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      ...init,
+      signal: init.signal ?? AbortSignal.timeout(DRIVE_TIMEOUT_MS),
+      headers: { Authorization: `Bearer ${token}`, ...(init.headers ?? {}) },
+    });
+  } catch (err) {
+    if (attempt === 0 && !init.signal) {
+      await new Promise((r) => setTimeout(r, 400));
+      return driveFetch(token, url, init, attempt + 1);
+    }
+    throw new Error(
+      err instanceof Error && err.name === "TimeoutError"
+        ? "Google Drive did not respond in time."
+        : "Could not reach Google Drive.",
+    );
+  }
+
   if (!res.ok) {
-    const body = await res.text();
     if (res.status === 401) throw new ReauthRequiredError();
+    // Retry transient throttling / upstream errors once; bodies are not reused.
+    if (attempt === 0 && (res.status === 429 || res.status >= 500) && !init.body) {
+      await new Promise((r) => setTimeout(r, 600));
+      return driveFetch(token, url, init, attempt + 1);
+    }
+    const body = await res.text();
     throw new Error(`Google Drive request failed [${res.status}]: ${body.slice(0, 300)}`);
   }
   return res;
@@ -315,7 +365,7 @@ export async function getDriveQuota(token: string) {
 
 async function findFolder(token: string, name: string, parent: string) {
   const q = [
-    `name = '${name.replace(/'/g, "\\'")}'`,
+    `name = '${escapeDriveQueryLiteral(name)}'`,
     "mimeType = 'application/vnd.google-apps.folder'",
     `'${parent}' in parents`,
     "trashed = false",
@@ -370,7 +420,8 @@ export async function ensureRootFolder(accountId: string, token: string): Promis
 
 /** Resolve "/clients/acme" into a nested folder chain under the nexdrive root. */
 export async function ensureFolderPath(token: string, rootId: string, folderPath: string) {
-  const segments = folderPath.split("/").filter(Boolean);
+  // Re-normalise defensively: no traversal segment may ever reach Drive.
+  const segments = normalizeFolderPath(folderPath).split("/").filter(Boolean);
   let parent = rootId;
   for (const segment of segments) {
     parent = await ensureFolder(token, segment, parent);

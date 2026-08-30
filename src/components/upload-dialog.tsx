@@ -53,6 +53,7 @@ export function UploadDialog({ trigger }: { trigger?: React.ReactNode }) {
   async function run() {
     if (!file) return;
     setStage({ kind: "routing" });
+    let jobId: string | null = null;
     try {
       const plannedFolder = folder.trim() || "/";
       const planned = await plan({
@@ -64,6 +65,7 @@ export function UploadDialog({ trigger }: { trigger?: React.ReactNode }) {
         },
       });
 
+      jobId = planned.jobId;
       setStage({
         kind: "uploading",
         provider: planned.provider,
@@ -72,16 +74,12 @@ export function UploadDialog({ trigger }: { trigger?: React.ReactNode }) {
         pct: 8,
       });
 
-      let storageKey = planned.storageKey;
-
       if (planned.transport === "drive") {
         const form = new FormData();
         form.append("file", file);
         form.append("jobId", planned.jobId);
         form.append("accountId", planned.accountId);
-        form.append("folderPath", plannedFolder);
-        const res = await driveUpload({ data: form });
-        storageKey = res.fileId;
+        await driveUpload({ data: form });
       } else if (planned.real) {
         const { error } = await supabase.storage
           .from(planned.bucket)
@@ -100,18 +98,8 @@ export function UploadDialog({ trigger }: { trigger?: React.ReactNode }) {
 
       setStage((s) => (s.kind === "uploading" ? { ...s, pct: 100 } : s));
 
-      await commit({
-        data: {
-          jobId: planned.jobId,
-          accountId: planned.accountId,
-          name: file.name,
-          size: file.size,
-          mimeType: file.type || "application/octet-stream",
-          folderPath: plannedFolder,
-          storageKey,
-          real: planned.real,
-        },
-      });
+      // Everything else is read from the server-owned job row.
+      await commit({ data: { jobId: planned.jobId } });
 
       setStage({
         kind: "done",
@@ -126,6 +114,10 @@ export function UploadDialog({ trigger }: { trigger?: React.ReactNode }) {
       });
     } catch (err) {
       const message = err instanceof Error ? err.message : "Upload failed";
+      if (jobId) {
+        // Mark the job failed so it cannot be committed later.
+        await commit({ data: { jobId, error: message } }).catch(() => undefined);
+      }
       setStage({ kind: "error", message });
       toast.error("Upload failed", { description: message });
     }

@@ -4,7 +4,11 @@ export type Theme = "light" | "dark";
 
 const STORAGE_KEY = "nexdrive.theme";
 
-const ThemeContext = createContext<{ theme: Theme; setTheme: (t: Theme) => void; toggle: () => void }>({
+const ThemeContext = createContext<{
+  theme: Theme;
+  setTheme: (t: Theme) => void;
+  toggle: () => void;
+}>({
   theme: "light",
   setTheme: () => {},
   toggle: () => {},

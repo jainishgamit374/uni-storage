@@ -45,11 +45,12 @@ export const Route = createFileRoute("/api/public/oauth/google/callback")({
           const code = url.searchParams.get("code");
           const state = url.searchParams.get("state");
           if (!code) return back(origin, { google: "error", message: "Google sent no code." });
-          if (!state)
-            return back(origin, { google: "error", message: "Missing security state." });
+          if (!state) return back(origin, { google: "error", message: "Missing security state." });
 
           const parsed = verifyPayload<{ u: string; n: string }>(state);
-          if (!parsed?.u) {
+          // Both fields are required: `n` makes every state unique, `u` binds
+          // it to the signed-in user who started the flow.
+          if (!parsed?.u || !parsed?.n) {
             return back(origin, {
               google: "error",
               message: "This authorisation link is invalid or expired. Try connecting again.",
@@ -133,10 +134,14 @@ export const Route = createFileRoute("/api/public/oauth/google/callback")({
 
           return back(origin, { google: "connected", email: profile.email });
         } catch (err) {
-          const message =
+          const detail =
             err instanceof Error ? err.message : "Google connection failed unexpectedly.";
-          console.error("[google-oauth-callback]", message);
-          return back(origin, { google: "error", message });
+          console.error("[google-oauth-callback]", detail);
+          // Never echo provider/internal detail into a URL the browser shows.
+          return back(origin, {
+            google: "error",
+            message: "Google connection failed. Please try connecting again.",
+          });
         }
       },
     },

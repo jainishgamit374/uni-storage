@@ -10,7 +10,14 @@ function originFromRequest() {
   return new URL(getRequest().url).origin;
 }
 
-async function assertAdmin(context: { supabase: any; userId: string }) {
+type RoleChecker = {
+  rpc: (
+    fn: "has_role",
+    args: { _user_id: string; _role: "admin" | "user" },
+  ) => PromiseLike<{ data: boolean | null }>;
+};
+
+async function assertAdmin(context: { supabase: RoleChecker; userId: string }) {
   const { data } = await context.supabase.rpc("has_role", {
     _user_id: context.userId,
     _role: "admin",

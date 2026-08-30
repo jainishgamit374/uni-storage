@@ -4,6 +4,10 @@ import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
+/** Minimal structural shape of the request-scoped Supabase client. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type SupabaseLike = { from: (table: string) => any };
+
 const GOOGLE_PROVIDER_ID = "google-drive";
 
 function originFromRequest() {
@@ -26,7 +30,6 @@ export const googleOauthStatus = createServerFn({ method: "GET" })
     };
   });
 
-
 /** Builds the real Google consent URL with a CSRF-safe, expiring signed state. */
 export const startGoogleConnect = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -40,11 +43,7 @@ export const startGoogleConnect = createServerFn({ method: "POST" })
     return { url: await buildAuthUrl(origin, state) };
   });
 
-async function ownedGoogleAccount(
-  supabase: { from: (t: string) => any },
-  userId: string,
-  accountId: string,
-) {
+async function ownedGoogleAccount(supabase: SupabaseLike, userId: string, accountId: string) {
   const { data } = await supabase
     .from("connected_accounts")
     .select("id, provider, is_mock, root_folder_id, quota_used, quota_total, label")
@@ -73,9 +72,8 @@ export const syncGoogleQuota = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     await ownedGoogleAccount(supabase as never, userId, data.accountId);
-    const { getAccessToken, getDriveQuota, ReauthRequiredError } = await import(
-      "./google-drive.server"
-    );
+    const { getAccessToken, getDriveQuota, ReauthRequiredError } =
+      await import("./google-drive.server");
     try {
       const token = await getAccessToken(data.accountId);
       const quota = await getDriveQuota(token);
@@ -106,9 +104,8 @@ export const listGoogleDrive = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     await ownedGoogleAccount(supabase as never, userId, data.accountId);
-    const { getAccessToken, ensureRootFolder, listDriveFiles } = await import(
-      "./google-drive.server"
-    );
+    const { getAccessToken, ensureRootFolder, listDriveFiles } =
+      await import("./google-drive.server");
     const token = await getAccessToken(data.accountId);
     const root = await ensureRootFolder(data.accountId, token);
     return { files: await listDriveFiles(token, root) };
@@ -117,7 +114,6 @@ export const listGoogleDrive = createServerFn({ method: "POST" })
 const uploadSchema = z.object({
   jobId: z.string().uuid(),
   accountId: z.string().uuid(),
-  folderPath: z.string().default("/"),
 });
 
 /** Streams the uploaded bytes through the server straight into Drive. */
@@ -130,29 +126,47 @@ export const uploadToGoogleDrive = createServerFn({ method: "POST" })
     const meta = uploadSchema.parse({
       jobId: input.get("jobId"),
       accountId: input.get("accountId"),
-      folderPath: String(input.get("folderPath") ?? "/"),
     });
     return { ...meta, file };
   })
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
+
+    // The job is the authority: it decides the account, name and folder that
+    // planUpload approved, so a tampered form cannot retarget the upload.
+    const { data: job } = await supabase
+      .from("upload_jobs")
+      .select("id, account_id, file_name, folder_path, mime_type, status")
+      .eq("id", data.jobId)
+      .eq("user_id", userId)
+      .maybeSingle();
+    if (!job) throw new Error("Upload job not found.");
+    if (job.status !== "uploading") throw new Error("This upload is no longer in progress.");
+    if (job.account_id !== data.accountId) throw new Error("Upload job does not match account.");
+
     await ownedGoogleAccount(supabase as never, userId, data.accountId);
-    const { getAccessToken, ensureRootFolder, ensureFolderPath, uploadDriveFile } = await import(
-      "./google-drive.server"
-    );
+    const { getAccessToken, ensureRootFolder, ensureFolderPath, uploadDriveFile } =
+      await import("./google-drive.server");
 
     try {
       const token = await getAccessToken(data.accountId);
       const root = await ensureRootFolder(data.accountId, token);
-      const parent = await ensureFolderPath(token, root, data.folderPath);
+      const parent = await ensureFolderPath(token, root, job.folder_path ?? "/");
       const bytes = await data.file.arrayBuffer();
       const uploaded = await uploadDriveFile({
         token,
         parentId: parent,
-        name: data.file.name,
-        mimeType: data.file.type || "application/octet-stream",
+        name: job.file_name,
+        mimeType: job.mime_type || "application/octet-stream",
         body: bytes,
       });
+      // Record the real key + byte count on the job so commitUpload never has
+      // to trust anything the browser sends back.
+      await supabase
+        .from("upload_jobs")
+        .update({ storage_key: uploaded.id, size: data.file.size, progress: 95 })
+        .eq("id", job.id)
+        .eq("user_id", userId);
       return { ok: true as const, fileId: uploaded.id, size: data.file.size };
     } catch (err) {
       const message = err instanceof Error ? err.message : "Drive upload failed.";
@@ -229,9 +243,8 @@ export const moveStoredFile = createServerFn({ method: "POST" })
         .eq("user_id", userId)
         .maybeSingle();
       if (account?.provider === GOOGLE_PROVIDER_ID) {
-        const { getAccessToken, ensureRootFolder, ensureFolderPath, moveDriveFile } = await import(
-          "./google-drive.server"
-        );
+        const { getAccessToken, ensureRootFolder, ensureFolderPath, moveDriveFile } =
+          await import("./google-drive.server");
         const token = await getAccessToken(file.account_id);
         const root = await ensureRootFolder(file.account_id, token);
         const parent = await ensureFolderPath(token, root, folderPath);
