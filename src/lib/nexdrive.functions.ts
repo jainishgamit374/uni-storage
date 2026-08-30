@@ -6,7 +6,7 @@ import { getProvider, defaultPolicy } from "./nexdrive.server";
 import { resolveProvider, type RoutableAccount, type RoutingPolicy } from "./routing";
 
 const ACCOUNT_COLUMNS =
-  "id, provider, label, is_mock, status, priority, quota_used, quota_total, config, created_at";
+  "id, provider, label, is_mock, status, priority, quota_used, quota_total, config, created_at, external_email, needs_reauth";
 
 export const getOverview = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])

@@ -19,6 +19,7 @@ import { Progress } from "@/components/ui/progress";
 import { ProviderGlyph } from "@/components/provider-glyph";
 import { supabase } from "@/integrations/supabase/client";
 import { commitUpload, planUpload } from "@/lib/nexdrive.functions";
+import { uploadToGoogleDrive } from "@/lib/google.functions";
 import { formatBytes } from "@/lib/format";
 import { providerMeta } from "@/lib/providers";
 import { useRefreshOverview } from "@/lib/use-overview";
@@ -40,6 +41,7 @@ export function UploadDialog({ trigger }: { trigger?: React.ReactNode }) {
 
   const plan = useServerFn(planUpload);
   const commit = useServerFn(commitUpload);
+  const driveUpload = useServerFn(uploadToGoogleDrive);
   const refresh = useRefreshOverview();
 
   function reset() {
@@ -70,7 +72,17 @@ export function UploadDialog({ trigger }: { trigger?: React.ReactNode }) {
         pct: 8,
       });
 
-      if (planned.real) {
+      let storageKey = planned.storageKey;
+
+      if (planned.transport === "drive") {
+        const form = new FormData();
+        form.append("file", file);
+        form.append("jobId", planned.jobId);
+        form.append("accountId", planned.accountId);
+        form.append("folderPath", plannedFolder);
+        const res = await driveUpload({ data: form });
+        storageKey = res.fileId;
+      } else if (planned.real) {
         const { error } = await supabase.storage
           .from(planned.bucket)
           .upload(planned.storageKey, file, {
@@ -96,7 +108,7 @@ export function UploadDialog({ trigger }: { trigger?: React.ReactNode }) {
           size: file.size,
           mimeType: file.type || "application/octet-stream",
           folderPath: plannedFolder,
-          storageKey: planned.storageKey,
+          storageKey,
           real: planned.real,
         },
       });
