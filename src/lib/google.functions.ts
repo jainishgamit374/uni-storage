@@ -43,11 +43,7 @@ export const startGoogleConnect = createServerFn({ method: "POST" })
     return { url: await buildAuthUrl(origin, state) };
   });
 
-async function ownedGoogleAccount(
-  supabase: SupabaseLike,
-  userId: string,
-  accountId: string,
-) {
+async function ownedGoogleAccount(supabase: SupabaseLike, userId: string, accountId: string) {
   const { data } = await supabase
     .from("connected_accounts")
     .select("id, provider, is_mock, root_folder_id, quota_used, quota_total, label")
