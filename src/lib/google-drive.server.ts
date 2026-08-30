@@ -141,15 +141,18 @@ export async function saveCredentials(params: {
   expiresIn: number;
 }) {
   const db = await admin();
-  const patch: Record<string, unknown> = {
+  const patch = {
     user_id: params.userId,
     account_id: params.accountId,
     provider: GOOGLE_PROVIDER_ID,
     access_token_ciphertext: encryptToken(params.accessToken),
     token_expiry: new Date(Date.now() + params.expiresIn * 1000).toISOString(),
     updated_at: new Date().toISOString(),
+    refresh_token_ciphertext: undefined as string | undefined,
   };
-  if (params.refreshToken) patch['refresh_token_ciphertext'] = encryptToken(params.refreshToken);
+  if (params.refreshToken) {
+    patch.refresh_token_ciphertext = encryptToken(params.refreshToken);
+  }
   const { error } = await db.from("oauth_credentials").upsert(patch, { onConflict: "account_id" });
   if (error) throw error;
 }
