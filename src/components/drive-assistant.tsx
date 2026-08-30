@@ -136,10 +136,11 @@ export function DriveAssistant() {
     if (provider) hits = hits.filter((f) => f.account === provider.label);
 
     const folderMatch = q.match(/(?:in|under)\s+\/?([\w-]+)/);
-    if (folderMatch) {
+    if (folderMatch?.[1]) {
       const seg = folderMatch[1];
       hits = hits.filter((f) => f.folder.toLowerCase().includes(seg));
     }
+
 
     const terms = q
       .replace(/[^a-z0-9.\s-]/g, " ")
