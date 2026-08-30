@@ -204,7 +204,8 @@ export const deleteFile = createServerFn({ method: "POST" })
       .maybeSingle();
     if (!file) throw new Error("File not found.");
 
-    let account: { provider: string; quota_used: number } | null = null;
+    type AccountRow = { provider: string; quota_used: number };
+    let account: AccountRow | null = null;
     if (file.account_id) {
       const { data: row } = await supabase
         .from("connected_accounts")
@@ -212,7 +213,7 @@ export const deleteFile = createServerFn({ method: "POST" })
         .eq("id", file.account_id)
         .eq("user_id", userId)
         .maybeSingle();
-      account = row as typeof account;
+      account = (row as AccountRow | null) ?? null;
     }
 
     if (file.storage_key && !file.is_mock) {
