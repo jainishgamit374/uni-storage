@@ -124,7 +124,7 @@ function DashboardPage() {
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="truncate text-sm font-medium">{a.label}</p>
-                    <Badge variant={a.is_mock ? "outline" : "default"} className="text-[10px]">
+                    <Badge variant={a.is_mock ? "outline" : "primary"} className="text-[10px]">
                       {a.is_mock ? "mock adapter" : "live"}
                     </Badge>
                     <span className="text-numeric ml-auto text-xs text-muted-foreground">

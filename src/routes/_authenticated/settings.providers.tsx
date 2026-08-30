@@ -113,7 +113,7 @@ function ProvidersPage() {
                       {a.status} · priority {a.priority}
                     </p>
                   </div>
-                  <Badge variant={a.is_mock ? "outline" : "default"} className="text-[10px]">
+                  <Badge variant={a.is_mock ? "outline" : "primary"} className="text-[10px]">
                     {a.is_mock ? "mock" : "live"}
                   </Badge>
                 </div>
