@@ -5,13 +5,13 @@ import { supabase } from "@/integrations/supabase/client";
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
   beforeLoad: async () => {
-    // Use the persisted client session for navigation guards. Server functions
-    // continue to validate the bearer token independently.
-    const { data, error } = await supabase.auth.getSession();
-    if (error || !data.session) {
+    // getUser() revalidates with the auth server, so a stale or revoked
+    // localStorage session cannot render the console shell.
+    const { data, error } = await supabase.auth.getUser();
+    if (error || !data.user) {
       throw redirect({ to: "/auth" });
     }
-    return { user: data.session.user };
+    return { user: data.user };
   },
   component: () => <Outlet />,
 });

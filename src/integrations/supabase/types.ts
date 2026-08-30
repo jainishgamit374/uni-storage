@@ -199,6 +199,7 @@ export type Database = {
           size: number
           storage_key: string | null
           updated_at: string
+          upload_job_id: string | null
           user_id: string
         }
         Insert: {
@@ -212,6 +213,7 @@ export type Database = {
           size?: number
           storage_key?: string | null
           updated_at?: string
+          upload_job_id?: string | null
           user_id: string
         }
         Update: {
@@ -225,6 +227,7 @@ export type Database = {
           size?: number
           storage_key?: string | null
           updated_at?: string
+          upload_job_id?: string | null
           user_id?: string
         }
         Relationships: [
@@ -235,6 +238,13 @@ export type Database = {
             referencedRelation: "connected_accounts"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "stored_files_upload_job_id_fkey"
+            columns: ["upload_job_id"]
+            isOneToOne: false
+            referencedRelation: "upload_jobs"
+            referencedColumns: ["id"]
+          },
         ]
       }
       upload_jobs: {
@@ -243,11 +253,15 @@ export type Database = {
           created_at: string
           error: string | null
           file_name: string
+          folder_path: string
           id: string
+          is_real: boolean
+          mime_type: string
           progress: number
           routed_by: string | null
           size: number
           status: string
+          storage_key: string | null
           user_id: string
         }
         Insert: {
@@ -255,11 +269,15 @@ export type Database = {
           created_at?: string
           error?: string | null
           file_name: string
+          folder_path?: string
           id?: string
+          is_real?: boolean
+          mime_type?: string
           progress?: number
           routed_by?: string | null
           size?: number
           status?: string
+          storage_key?: string | null
           user_id: string
         }
         Update: {
@@ -267,11 +285,15 @@ export type Database = {
           created_at?: string
           error?: string | null
           file_name?: string
+          folder_path?: string
           id?: string
+          is_real?: boolean
+          mime_type?: string
           progress?: number
           routed_by?: string | null
           size?: number
           status?: string
+          storage_key?: string | null
           user_id?: string
         }
         Relationships: [
@@ -317,6 +339,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      recalc_account_quota: { Args: { _account_id: string }; Returns: number }
     }
     Enums: {
       app_role: "admin" | "user"

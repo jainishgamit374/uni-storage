@@ -1,13 +1,5 @@
 export type ProviderId =
-  | "nexdrive"
-  | "google-drive"
-  | "dropbox"
-  | "onedrive"
-  | "r2"
-  | "b2"
-  | "wasabi"
-  | "minio"
-  | "s3";
+  "nexdrive" | "google-drive" | "dropbox" | "onedrive" | "r2" | "b2" | "wasabi" | "minio" | "s3";
 
 export type ProviderKind = "native" | "oauth" | "s3-compatible";
 

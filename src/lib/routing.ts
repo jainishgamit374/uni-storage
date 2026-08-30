@@ -95,8 +95,6 @@ export function resolveProvider(
   return {
     account: acct,
     reason:
-      policy.mode === "most-available"
-        ? "most available space"
-        : "fallback: most available space",
+      policy.mode === "most-available" ? "most available space" : "fallback: most available space",
   };
 }
