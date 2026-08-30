@@ -18,6 +18,7 @@ import { Route as AuthenticatedQuotaRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedUploadsRouteImport } from './routes/_authenticated/uploads'
 import { Route as AuthenticatedSettingsPolicyRouteImport } from './routes/_authenticated/settings.policy'
 import { Route as AuthenticatedSettingsProvidersRouteImport } from './routes/_authenticated/settings.providers'
+import { Route as ApiPublicDriveDownloadRouteImport } from './routes/api/public/drive/download'
 import { Route as ApiPublicOauthGoogleCallbackRouteImport } from './routes/api/public/oauth/google/callback'
 
 const IndexRoute = IndexRouteImport.update({
@@ -66,6 +67,11 @@ const AuthenticatedSettingsProvidersRoute =
     path: '/settings/providers',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiPublicDriveDownloadRoute = ApiPublicDriveDownloadRouteImport.update({
+  id: '/api/public/drive/download',
+  path: '/api/public/drive/download',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicOauthGoogleCallbackRoute =
   ApiPublicOauthGoogleCallbackRouteImport.update({
     id: '/api/public/oauth/google/callback',
@@ -82,6 +88,7 @@ export interface FileRoutesByFullPath {
   '/uploads': typeof AuthenticatedUploadsRoute
   '/settings/policy': typeof AuthenticatedSettingsPolicyRoute
   '/settings/providers': typeof AuthenticatedSettingsProvidersRoute
+  '/api/public/drive/download': typeof ApiPublicDriveDownloadRoute
   '/api/public/oauth/google/callback': typeof ApiPublicOauthGoogleCallbackRoute
 }
 export interface FileRoutesByTo {
@@ -93,6 +100,7 @@ export interface FileRoutesByTo {
   '/uploads': typeof AuthenticatedUploadsRoute
   '/settings/policy': typeof AuthenticatedSettingsPolicyRoute
   '/settings/providers': typeof AuthenticatedSettingsProvidersRoute
+  '/api/public/drive/download': typeof ApiPublicDriveDownloadRoute
   '/api/public/oauth/google/callback': typeof ApiPublicOauthGoogleCallbackRoute
 }
 export interface FileRoutesById {
@@ -106,6 +114,7 @@ export interface FileRoutesById {
   '/_authenticated/uploads': typeof AuthenticatedUploadsRoute
   '/_authenticated/settings/policy': typeof AuthenticatedSettingsPolicyRoute
   '/_authenticated/settings/providers': typeof AuthenticatedSettingsProvidersRoute
+  '/api/public/drive/download': typeof ApiPublicDriveDownloadRoute
   '/api/public/oauth/google/callback': typeof ApiPublicOauthGoogleCallbackRoute
 }
 export interface FileRouteTypes {
@@ -119,6 +128,7 @@ export interface FileRouteTypes {
     | '/uploads'
     | '/settings/policy'
     | '/settings/providers'
+    | '/api/public/drive/download'
     | '/api/public/oauth/google/callback'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -130,6 +140,7 @@ export interface FileRouteTypes {
     | '/uploads'
     | '/settings/policy'
     | '/settings/providers'
+    | '/api/public/drive/download'
     | '/api/public/oauth/google/callback'
   id:
     | '__root__'
@@ -142,6 +153,7 @@ export interface FileRouteTypes {
     | '/_authenticated/uploads'
     | '/_authenticated/settings/policy'
     | '/_authenticated/settings/providers'
+    | '/api/public/drive/download'
     | '/api/public/oauth/google/callback'
   fileRoutesById: FileRoutesById
 }
@@ -149,6 +161,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ApiPublicDriveDownloadRoute: typeof ApiPublicDriveDownloadRoute
   ApiPublicOauthGoogleCallbackRoute: typeof ApiPublicOauthGoogleCallbackRoute
 }
 
@@ -217,6 +230,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsProvidersRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/drive/download': {
+      id: '/api/public/drive/download'
+      path: '/api/public/drive/download'
+      fullPath: '/api/public/drive/download'
+      preLoaderRoute: typeof ApiPublicDriveDownloadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/oauth/google/callback': {
       id: '/api/public/oauth/google/callback'
       path: '/api/public/oauth/google/callback'
@@ -252,6 +272,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ApiPublicDriveDownloadRoute: ApiPublicDriveDownloadRoute,
   ApiPublicOauthGoogleCallbackRoute: ApiPublicOauthGoogleCallbackRoute,
 }
 export const routeTree = rootRouteImport
