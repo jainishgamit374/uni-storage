@@ -54,6 +54,10 @@
   --color-surface: var(--surface);
   --color-surface-raised: var(--surface-raised);
   --color-grid-line: var(--grid-line);
+  --color-tint-lime: var(--tint-lime);
+  --color-tint-peach: var(--tint-peach);
+  --color-tint-lilac: var(--tint-lilac);
+  --color-tint-sky: var(--tint-sky);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
@@ -111,6 +115,12 @@
 
   --ink: oklch(0.17 0.012 265);
   --ink-foreground: oklch(0.97 0.003 250);
+
+  /* Soft pastel header tints for provider cards */
+  --tint-lime: oklch(0.92 0.16 128);
+  --tint-peach: oklch(0.9 0.09 62);
+  --tint-lilac: oklch(0.88 0.07 305);
+  --tint-sky: oklch(0.9 0.06 245);
 
   --border: oklch(0.89 0.005 260);
   --input: oklch(0.89 0.005 260);
@@ -177,6 +187,12 @@
 
   --ink: oklch(0.195 0.006 285);
   --ink-foreground: oklch(0.92 0.004 286);
+
+  /* Provider tints stay visible but muted on ink surfaces */
+  --tint-lime: oklch(0.4 0.1 128);
+  --tint-peach: oklch(0.42 0.08 62);
+  --tint-lilac: oklch(0.4 0.07 305);
+  --tint-sky: oklch(0.42 0.07 245);
 
   --border: oklch(0.325 0.008 285);
   --input: oklch(0.325 0.008 285);
