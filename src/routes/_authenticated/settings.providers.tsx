@@ -22,7 +22,7 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatBytes } from "@/lib/format";
 import { connectAccount, disconnectAccount } from "@/lib/nexdrive.functions";
-import { syncGoogleQuota } from "@/lib/google.functions";
+import { listGoogleDrive, syncGoogleQuota } from "@/lib/google.functions";
 import { PROVIDERS, providerTint, type ProviderMeta } from "@/lib/providers";
 import { useOverview, useRefreshOverview } from "@/lib/use-overview";
 
@@ -53,6 +53,23 @@ function ProvidersPage() {
   const syncQuota = useServerFn(syncGoogleQuota);
   const router = useRouter();
   const [syncing, setSyncing] = useState<string | null>(null);
+  const listDrive = useServerFn(listGoogleDrive);
+  const [browse, setBrowse] = useState<{
+    label: string;
+    loading: boolean;
+    files: { id: string; name: string; size: number; modifiedTime: string }[];
+  } | null>(null);
+
+  async function onBrowse(id: string, label: string) {
+    setBrowse({ label, loading: true, files: [] });
+    try {
+      const res = await listDrive({ data: { accountId: id } });
+      setBrowse({ label, loading: false, files: res.files });
+    } catch (err) {
+      setBrowse(null);
+      toast.error(err instanceof Error ? err.message : "Could not read the Drive folder");
+    }
+  }
 
   // Surface the outcome of the Google OAuth round-trip, then clean the URL.
   useEffect(() => {
@@ -224,6 +241,16 @@ function ProvidersPage() {
                     used={Number(a.quota_used)}
                     total={Number(a.quota_total)}
                   />
+                  {a.provider === "google-drive" && !a.is_mock && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="mt-3 w-full"
+                      onClick={() => onBrowse(a.id, a.label)}
+                    >
+                      Browse nexdrive folder
+                    </Button>
+                  )}
                   {a.needs_reauth && (
                     <Button
                       variant="outline"
