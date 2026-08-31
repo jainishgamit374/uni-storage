@@ -308,6 +308,42 @@ function ProvidersPage() {
         </div>
       </section>
 
+      <Dialog open={!!browse} onOpenChange={(o) => !o && setBrowse(null)}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="truncate">{browse?.label} — /nexdrive</DialogTitle>
+            <DialogDescription>Live listing straight from Google Drive.</DialogDescription>
+          </DialogHeader>
+          {browse?.loading ? (
+            <div className="space-y-2">
+              <Skeleton className="h-8 w-full" />
+              <Skeleton className="h-8 w-full" />
+              <Skeleton className="h-8 w-2/3" />
+            </div>
+          ) : browse?.files.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              This folder is empty. Upload a file routed to this account and it will appear here.
+            </p>
+          ) : (
+            <ul className="max-h-80 divide-y divide-border overflow-y-auto text-sm">
+              {(browse?.files ?? []).map((f) => (
+                <li key={f.id} className="flex items-center justify-between gap-3 py-2">
+                  <span className="truncate">{f.name}</span>
+                  <span className="text-numeric shrink-0 text-xs text-muted-foreground">
+                    {formatBytes(Number(f.size))}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setBrowse(null)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={!!target} onOpenChange={(o) => !o && setTarget(null)}>
         <DialogContent>
           <DialogHeader>
