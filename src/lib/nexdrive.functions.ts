@@ -329,18 +329,20 @@ export const deleteFile = createServerFn({ method: "POST" })
 
 export const getDownloadUrl = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
+  .inputValidator((input: unknown) =>
+    z.object({ id: z.string().uuid(), inline: z.boolean().optional() }).parse(input),
+  )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const { data: file } = await supabase
       .from("stored_files")
-      .select("id, storage_key, is_mock, account_id")
+      .select("id, storage_key, is_mock, account_id, mime_type, name")
       .eq("id", data.id)
       .eq("user_id", userId)
       .maybeSingle();
     if (!file) throw new Error("File not found.");
     if (file.is_mock || !file.storage_key) {
-      return { url: null as string | null, mock: true };
+      return { url: null as string | null, mock: true, mimeType: file.mime_type ?? null };
     }
 
     if (file.account_id) {
@@ -359,12 +361,19 @@ export const getDownloadUrl = createServerFn({ method: "POST" })
         // Bind the link to the owner + file so a tampered token cannot be
         // pointed at another account's object.
         const token = signPayload(
-          { a: file.account_id, f: file.storage_key, u: userId, i: file.id },
+          {
+            a: file.account_id,
+            f: file.storage_key,
+            u: userId,
+            i: file.id,
+            d: data.inline ? "i" : "a",
+          },
           300,
         );
         return {
           url: `${origin}/api/public/drive/download?t=${encodeURIComponent(token)}`,
           mock: false,
+          mimeType: file.mime_type ?? null,
         };
       }
     }
@@ -373,7 +382,7 @@ export const getDownloadUrl = createServerFn({ method: "POST" })
       .from("nexdrive")
       .createSignedUrl(file.storage_key, 600);
     if (error) throw error;
-    return { url: signed?.signedUrl ?? null, mock: false };
+    return { url: signed?.signedUrl ?? null, mock: false, mimeType: file.mime_type ?? null };
   });
 
 const MAX_ACCOUNTS_PER_USER = 25;
