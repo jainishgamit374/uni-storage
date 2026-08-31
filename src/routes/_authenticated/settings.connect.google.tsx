@@ -63,14 +63,31 @@ function GoogleConsentPage() {
 
   async function allow() {
     setRedirecting(true);
+    // Google refuses to render its consent screen inside an iframe (403), and the
+    // Lovable preview is an iframe — so always hand off to a real top-level window.
+    const popup = window.open("about:blank", "_blank", "noopener,noreferrer,width=520,height=680");
     try {
       const { url } = await begin({ data: undefined });
-      window.location.href = url;
+      if (popup && !popup.closed) {
+        popup.location.href = url;
+        toast.info("Continue in the Google window", {
+          description: "Approve access there, then come back to Providers.",
+        });
+      } else {
+        // Popup blocked: try to escape the preview iframe, else navigate this frame.
+        try {
+          (window.top ?? window).location.href = url;
+        } catch {
+          window.location.href = url;
+        }
+      }
     } catch (err) {
-      setRedirecting(false);
+      popup?.close();
       toast.error("Cannot start Google sign-in", {
         description: err instanceof Error ? err.message : undefined,
       });
+    } finally {
+      setRedirecting(false);
     }
   }
 
