@@ -383,6 +383,54 @@
   animation: var(--animate-rise);
 }
 
+/*
+ * Soft tinted header field for provider cards.
+ * Set `--tint` inline to one of the --color-tint-* tokens.
+ */
+@utility tint-field {
+  background-image:
+    radial-gradient(
+      130% 110% at 50% 118%,
+      color-mix(in oklab, var(--tint) 92%, white 8%) 0%,
+      transparent 72%
+    ),
+    linear-gradient(
+      165deg,
+      color-mix(in oklab, var(--tint) 28%, var(--surface)) 0%,
+      color-mix(in oklab, var(--tint) 78%, var(--surface)) 100%
+    );
+}
+
+/* Ink pill action used on provider cards (matches the reference UI). */
+@utility pill-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  border-radius: 999px;
+  background-color: var(--ink);
+  color: var(--ink-foreground);
+  padding: 0.5rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  transition:
+    transform 0.2s var(--ease-out-soft),
+    box-shadow 0.2s var(--ease-out-soft),
+    opacity 0.2s var(--ease-out-soft);
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-lift);
+  }
+  &:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+  &:disabled {
+    opacity: 0.55;
+    transform: none;
+    box-shadow: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.001ms !important;
