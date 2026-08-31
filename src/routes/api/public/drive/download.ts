@@ -13,7 +13,7 @@ export const Route = createFileRoute("/api/public/drive/download")({
         if (!token) return new Response("Missing token", { status: 400 });
 
         const { verifyPayload } = await import("@/lib/token-crypto.server");
-        const payload = verifyPayload<{ a: string; f: string; u: string; i: string }>(token);
+        const payload = verifyPayload<{ a: string; f: string; u: string; i: string; d?: string }>(token);
         if (!payload?.a || !payload?.f || !payload?.u || !payload?.i) {
           return new Response("This download link is invalid or has expired.", { status: 403 });
         }
@@ -41,7 +41,7 @@ export const Route = createFileRoute("/api/public/drive/download")({
           return new Response(file.stream, {
             headers: {
               "Content-Type": file.mimeType || "application/octet-stream",
-              "Content-Disposition": `attachment; filename="${file.name.replace(/"/g, "")}"`,
+              "Content-Disposition": `${payload.d === "i" ? "inline" : "attachment"}; filename="${file.name.replace(/"/g, "")}"`,
               "Cache-Control": "no-store",
             },
           });

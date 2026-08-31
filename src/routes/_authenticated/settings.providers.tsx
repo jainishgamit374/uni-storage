@@ -22,7 +22,7 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatBytes } from "@/lib/format";
 import { connectAccount, disconnectAccount } from "@/lib/nexdrive.functions";
-import { startGoogleConnect, syncGoogleQuota } from "@/lib/google.functions";
+import { listGoogleDrive, syncGoogleQuota } from "@/lib/google.functions";
 import { PROVIDERS, providerTint, type ProviderMeta } from "@/lib/providers";
 import { useOverview, useRefreshOverview } from "@/lib/use-overview";
 
@@ -50,10 +50,26 @@ function ProvidersPage() {
   const refresh = useRefreshOverview();
   const connect = useServerFn(connectAccount);
   const disconnect = useServerFn(disconnectAccount);
-  const beginGoogle = useServerFn(startGoogleConnect);
   const syncQuota = useServerFn(syncGoogleQuota);
   const router = useRouter();
   const [syncing, setSyncing] = useState<string | null>(null);
+  const listDrive = useServerFn(listGoogleDrive);
+  const [browse, setBrowse] = useState<{
+    label: string;
+    loading: boolean;
+    files: { id: string; name: string; size: number; modifiedTime: string }[];
+  } | null>(null);
+
+  async function onBrowse(id: string, label: string) {
+    setBrowse({ label, loading: true, files: [] });
+    try {
+      const res = await listDrive({ data: { accountId: id } });
+      setBrowse({ label, loading: false, files: res.files });
+    } catch (err) {
+      setBrowse(null);
+      toast.error(err instanceof Error ? err.message : "Could not read the Drive folder");
+    }
+  }
 
   // Surface the outcome of the Google OAuth round-trip, then clean the URL.
   useEffect(() => {
@@ -75,15 +91,9 @@ function ProvidersPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function connectGoogle() {
-    try {
-      const { url } = await beginGoogle({ data: undefined });
-      window.location.href = url;
-    } catch (err) {
-      toast.error("Cannot start Google sign-in", {
-        description: err instanceof Error ? err.message : undefined,
-      });
-    }
+  function connectGoogle() {
+    // Full consent screen first — users see exactly what they are granting.
+    void router.navigate({ to: "/settings/connect/google" });
   }
 
   async function onSyncQuota(id: string) {
@@ -106,7 +116,7 @@ function ProvidersPage() {
 
   function openConnect(meta: ProviderMeta) {
     if (meta.id === "google-drive") {
-      void connectGoogle();
+      connectGoogle();
       return;
     }
     setTarget(meta);
@@ -231,6 +241,16 @@ function ProvidersPage() {
                     used={Number(a.quota_used)}
                     total={Number(a.quota_total)}
                   />
+                  {a.provider === "google-drive" && !a.is_mock && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="mt-3 w-full"
+                      onClick={() => onBrowse(a.id, a.label)}
+                    >
+                      Browse nexdrive folder
+                    </Button>
+                  )}
                   {a.needs_reauth && (
                     <Button
                       variant="outline"
@@ -287,6 +307,42 @@ function ProvidersPage() {
           ))}
         </div>
       </section>
+
+      <Dialog open={!!browse} onOpenChange={(o) => !o && setBrowse(null)}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="truncate">{browse?.label} — /nexdrive</DialogTitle>
+            <DialogDescription>Live listing straight from Google Drive.</DialogDescription>
+          </DialogHeader>
+          {browse?.loading ? (
+            <div className="space-y-2">
+              <Skeleton className="h-8 w-full" />
+              <Skeleton className="h-8 w-full" />
+              <Skeleton className="h-8 w-2/3" />
+            </div>
+          ) : browse?.files.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              This folder is empty. Upload a file routed to this account and it will appear here.
+            </p>
+          ) : (
+            <ul className="max-h-80 divide-y divide-border overflow-y-auto text-sm">
+              {(browse?.files ?? []).map((f) => (
+                <li key={f.id} className="flex items-center justify-between gap-3 py-2">
+                  <span className="truncate">{f.name}</span>
+                  <span className="text-numeric shrink-0 text-xs text-muted-foreground">
+                    {formatBytes(Number(f.size))}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setBrowse(null)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={!!target} onOpenChange={(o) => !o && setTarget(null)}>
         <DialogContent>

@@ -22,6 +22,7 @@ import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authen
 import { Route as AuthenticatedSettingsOauthRouteImport } from './routes/_authenticated/settings.oauth'
 import { Route as AuthenticatedSettingsPolicyRouteImport } from './routes/_authenticated/settings.policy'
 import { Route as AuthenticatedSettingsProvidersRouteImport } from './routes/_authenticated/settings.providers'
+import { Route as AuthenticatedSettingsConnectGoogleRouteImport } from './routes/_authenticated/settings.connect.google'
 import { Route as ApiPublicDriveDownloadRouteImport } from './routes/api/public/drive/download'
 import { Route as ApiPublicOauthGoogleCallbackRouteImport } from './routes/api/public/oauth/google/callback'
 
@@ -93,6 +94,12 @@ const AuthenticatedSettingsProvidersRoute =
     path: '/settings/providers',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedSettingsConnectGoogleRoute =
+  AuthenticatedSettingsConnectGoogleRouteImport.update({
+    id: '/settings/connect/google',
+    path: '/settings/connect/google',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const ApiPublicDriveDownloadRoute = ApiPublicDriveDownloadRouteImport.update({
   id: '/api/public/drive/download',
   path: '/api/public/drive/download',
@@ -118,6 +125,7 @@ export interface FileRoutesByFullPath {
   '/settings/policy': typeof AuthenticatedSettingsPolicyRoute
   '/settings/providers': typeof AuthenticatedSettingsProvidersRoute
   '/settings/': typeof AuthenticatedSettingsIndexRoute
+  '/settings/connect/google': typeof AuthenticatedSettingsConnectGoogleRoute
   '/api/public/drive/download': typeof ApiPublicDriveDownloadRoute
   '/api/public/oauth/google/callback': typeof ApiPublicOauthGoogleCallbackRoute
 }
@@ -134,6 +142,7 @@ export interface FileRoutesByTo {
   '/settings/policy': typeof AuthenticatedSettingsPolicyRoute
   '/settings/providers': typeof AuthenticatedSettingsProvidersRoute
   '/settings': typeof AuthenticatedSettingsIndexRoute
+  '/settings/connect/google': typeof AuthenticatedSettingsConnectGoogleRoute
   '/api/public/drive/download': typeof ApiPublicDriveDownloadRoute
   '/api/public/oauth/google/callback': typeof ApiPublicOauthGoogleCallbackRoute
 }
@@ -152,6 +161,7 @@ export interface FileRoutesById {
   '/_authenticated/settings/policy': typeof AuthenticatedSettingsPolicyRoute
   '/_authenticated/settings/providers': typeof AuthenticatedSettingsProvidersRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
+  '/_authenticated/settings/connect/google': typeof AuthenticatedSettingsConnectGoogleRoute
   '/api/public/drive/download': typeof ApiPublicDriveDownloadRoute
   '/api/public/oauth/google/callback': typeof ApiPublicOauthGoogleCallbackRoute
 }
@@ -170,6 +180,7 @@ export interface FileRouteTypes {
     | '/settings/policy'
     | '/settings/providers'
     | '/settings/'
+    | '/settings/connect/google'
     | '/api/public/drive/download'
     | '/api/public/oauth/google/callback'
   fileRoutesByTo: FileRoutesByTo
@@ -186,6 +197,7 @@ export interface FileRouteTypes {
     | '/settings/policy'
     | '/settings/providers'
     | '/settings'
+    | '/settings/connect/google'
     | '/api/public/drive/download'
     | '/api/public/oauth/google/callback'
   id:
@@ -203,6 +215,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings/policy'
     | '/_authenticated/settings/providers'
     | '/_authenticated/settings/'
+    | '/_authenticated/settings/connect/google'
     | '/api/public/drive/download'
     | '/api/public/oauth/google/callback'
   fileRoutesById: FileRoutesById
@@ -310,6 +323,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsProvidersRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/settings/connect/google': {
+      id: '/_authenticated/settings/connect/google'
+      path: '/settings/connect/google'
+      fullPath: '/settings/connect/google'
+      preLoaderRoute: typeof AuthenticatedSettingsConnectGoogleRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/api/public/drive/download': {
       id: '/api/public/drive/download'
       path: '/api/public/drive/download'
@@ -336,6 +356,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsPolicyRoute: typeof AuthenticatedSettingsPolicyRoute
   AuthenticatedSettingsProvidersRoute: typeof AuthenticatedSettingsProvidersRoute
   AuthenticatedSettingsIndexRoute: typeof AuthenticatedSettingsIndexRoute
+  AuthenticatedSettingsConnectGoogleRoute: typeof AuthenticatedSettingsConnectGoogleRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -347,6 +368,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSettingsPolicyRoute: AuthenticatedSettingsPolicyRoute,
   AuthenticatedSettingsProvidersRoute: AuthenticatedSettingsProvidersRoute,
   AuthenticatedSettingsIndexRoute: AuthenticatedSettingsIndexRoute,
+  AuthenticatedSettingsConnectGoogleRoute:
+    AuthenticatedSettingsConnectGoogleRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
