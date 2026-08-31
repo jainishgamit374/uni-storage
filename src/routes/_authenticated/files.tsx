@@ -5,6 +5,7 @@ import {
   Download,
   FolderInput,
   FolderSearch,
+  Eye,
   MoreHorizontal,
   Pencil,
   Search,
@@ -80,6 +81,11 @@ function FilesPage() {
     null,
   );
   const [saving, setSaving] = useState(false);
+  const [preview, setPreview] = useState<{
+    name: string;
+    url: string;
+    mimeType: string | null;
+  } | null>(null);
 
   async function saveEdit() {
     if (!edit) return;
@@ -124,6 +130,21 @@ function FilesPage() {
       window.open(res.url, "_blank", "noopener");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Could not create download link");
+    }
+  }
+
+  async function onPreview(id: string, name: string) {
+    try {
+      const res = await download({ data: { id, inline: true } });
+      if (res.mock || !res.url) {
+        toast.info("Simulated adapter", {
+          description: "Mock providers hold no bytes to preview.",
+        });
+        return;
+      }
+      setPreview({ name, url: res.url, mimeType: res.mimeType });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not open preview");
     }
   }
 
@@ -248,6 +269,9 @@ function FilesPage() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => onPreview(f.id, f.name)}>
+                              <Eye className="size-4" /> Preview
+                            </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => onDownload(f.id)}>
                               <Download className="size-4" /> Download
                             </DropdownMenuItem>
@@ -282,6 +306,43 @@ function FilesPage() {
           )}
         </div>
       </div>
+
+      <Dialog open={!!preview} onOpenChange={(o) => !o && setPreview(null)}>
+        <DialogContent className="sm:max-w-3xl">
+          <DialogHeader>
+            <DialogTitle className="truncate">{preview?.name}</DialogTitle>
+          </DialogHeader>
+          {preview &&
+            (preview.mimeType?.startsWith("image/") ? (
+              <img
+                src={preview.url}
+                alt={preview.name}
+                className="max-h-[70vh] w-full rounded-lg object-contain"
+              />
+            ) : preview.mimeType?.startsWith("video/") ? (
+              <video src={preview.url} controls className="max-h-[70vh] w-full rounded-lg" />
+            ) : preview.mimeType?.startsWith("audio/") ? (
+              <audio src={preview.url} controls className="w-full" />
+            ) : (
+              <iframe
+                src={preview.url}
+                title={preview.name}
+                className="h-[70vh] w-full rounded-lg border border-border bg-surface"
+              />
+            ))}
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setPreview(null)}>
+              Close
+            </Button>
+            <Button
+              className="pill-action"
+              onClick={() => preview && window.open(preview.url, "_blank", "noopener")}
+            >
+              Open in new tab
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={!!edit} onOpenChange={(o) => !o && setEdit(null)}>
         <DialogContent className="sm:max-w-md">
