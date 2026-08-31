@@ -22,7 +22,7 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatBytes } from "@/lib/format";
 import { connectAccount, disconnectAccount } from "@/lib/nexdrive.functions";
-import { startGoogleConnect, syncGoogleQuota } from "@/lib/google.functions";
+import { syncGoogleQuota } from "@/lib/google.functions";
 import { PROVIDERS, providerTint, type ProviderMeta } from "@/lib/providers";
 import { useOverview, useRefreshOverview } from "@/lib/use-overview";
 
@@ -50,7 +50,6 @@ function ProvidersPage() {
   const refresh = useRefreshOverview();
   const connect = useServerFn(connectAccount);
   const disconnect = useServerFn(disconnectAccount);
-  const beginGoogle = useServerFn(startGoogleConnect);
   const syncQuota = useServerFn(syncGoogleQuota);
   const router = useRouter();
   const [syncing, setSyncing] = useState<string | null>(null);
@@ -75,15 +74,9 @@ function ProvidersPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function connectGoogle() {
-    try {
-      const { url } = await beginGoogle({ data: undefined });
-      window.location.href = url;
-    } catch (err) {
-      toast.error("Cannot start Google sign-in", {
-        description: err instanceof Error ? err.message : undefined,
-      });
-    }
+  function connectGoogle() {
+    // Full consent screen first — users see exactly what they are granting.
+    void router.navigate({ to: "/settings/connect/google" });
   }
 
   async function onSyncQuota(id: string) {
@@ -106,7 +99,7 @@ function ProvidersPage() {
 
   function openConnect(meta: ProviderMeta) {
     if (meta.id === "google-drive") {
-      void connectGoogle();
+      connectGoogle();
       return;
     }
     setTarget(meta);

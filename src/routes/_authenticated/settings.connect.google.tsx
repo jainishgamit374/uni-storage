@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { useState } from "react";
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
@@ -87,7 +88,10 @@ function GoogleConsentPage() {
         </Link>
 
         <div className="panel overflow-hidden">
-          <div className="tint-field flex items-center gap-4 p-6" data-tint="sky">
+          <div
+            className="tint-field flex items-center gap-4 p-6"
+            style={{ "--tint": "var(--tint-sky)" } as CSSProperties}
+          >
             <ProviderGlyph provider="google-drive" size="lg" />
             <div>
               <h2 className="font-display text-2xl leading-tight">Google Drive</h2>
