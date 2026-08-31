@@ -103,6 +103,23 @@ export function providerMeta(id: string): ProviderMeta {
   );
 }
 
+/** Pastel header tint (design token name) per provider, for provider cards. */
+const PROVIDER_TINTS: Record<string, string> = {
+  nexdrive: "--color-tint-lime",
+  "google-drive": "--color-tint-sky",
+  dropbox: "--color-tint-lilac",
+  onedrive: "--color-tint-peach",
+  r2: "--color-tint-peach",
+  b2: "--color-tint-lime",
+  wasabi: "--color-tint-sky",
+  minio: "--color-tint-lilac",
+  s3: "--color-tint-peach",
+};
+
+export function providerTint(id: string): string {
+  return PROVIDER_TINTS[id] ?? "--color-tint-sky";
+}
+
 export const ROUTING_MODES = [
   {
     id: "most-available",
