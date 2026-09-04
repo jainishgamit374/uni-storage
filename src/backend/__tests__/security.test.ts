@@ -123,7 +123,7 @@ describe("signed payloads (state + download links)", () => {
   beforeAll(async () => {
     process.env["GOOGLE_OAUTH_STATE_SECRET"] = "unit-test-state-secret";
     process.env["GOOGLE_TOKEN_ENC_KEY"] = "unit-test-encryption-key";
-    crypto = await import("../token-crypto.server");
+    crypto = await import("@/backend/services/token-crypto.server");
   });
 
   it("round-trips a payload", () => {
