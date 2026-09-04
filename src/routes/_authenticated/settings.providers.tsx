@@ -21,8 +21,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatBytes } from "@/lib/format";
-import { connectAccount, disconnectAccount } from "@/backend/api/nexdrive.functions";
-import { listGoogleDrive, syncGoogleQuota } from "@/backend/api/google.functions";
+import { connectAccount, disconnectAccount } from "@/lib/nexdrive.functions";
+import { listGoogleDrive, syncGoogleQuota } from "@/lib/google.functions";
 import { PROVIDERS, providerTint, type ProviderMeta } from "@/lib/providers";
 import { useOverview, useRefreshOverview } from "@/lib/use-overview";
 

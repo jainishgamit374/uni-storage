@@ -15,7 +15,7 @@ import {
   clearGoogleOauthConfig,
   getGoogleOauthConfig,
   saveGoogleOauthConfig,
-} from "@/backend/api/google-config.functions";
+} from "@/lib/google-config.functions";
 
 export const Route = createFileRoute("/_authenticated/settings/oauth")({
   head: () => ({

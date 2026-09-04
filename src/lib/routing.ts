@@ -1,4 +1,4 @@
-import type { FolderRule, RoutingMode, TypeRule } from "@/lib/providers";
+import type { FolderRule, RoutingMode, TypeRule } from "./providers";
 
 export interface RoutableAccount {
   id: string;

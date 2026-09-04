@@ -26,8 +26,8 @@ export const Route = createFileRoute("/api/public/oauth/google/callback")({
             GOOGLE_PROVIDER_ID,
           },
         ] = await Promise.all([
-          import("@/backend/services/token-crypto.server"),
-          import("@/backend/services/google-drive.server"),
+          import("@/lib/token-crypto.server"),
+          import("@/lib/google-drive.server"),
         ]);
 
         try {

@@ -18,7 +18,7 @@ function originFromRequest() {
 export const googleOauthStatus = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { googleConfigured, redirectUri } = await import("@/backend/services/google-drive.server");
+    const { googleConfigured, redirectUri } = await import("./google-drive.server");
     const { data: isAdmin } = await context.supabase.rpc("has_role", {
       _user_id: context.userId,
       _role: "admin",
@@ -35,8 +35,8 @@ export const startGoogleConnect = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const [{ buildAuthUrl }, { signPayload, randomNonce }] = await Promise.all([
-      import("@/backend/services/google-drive.server"),
-      import("@/backend/services/token-crypto.server"),
+      import("./google-drive.server"),
+      import("./token-crypto.server"),
     ]);
     const origin = originFromRequest();
     const state = signPayload({ u: context.userId, n: randomNonce() }, 600);
@@ -73,7 +73,7 @@ export const syncGoogleQuota = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     await ownedGoogleAccount(supabase as never, userId, data.accountId);
     const { getAccessToken, getDriveQuota, ReauthRequiredError } =
-      await import("@/backend/services/google-drive.server");
+      await import("./google-drive.server");
     try {
       const token = await getAccessToken(data.accountId);
       const quota = await getDriveQuota(token);
@@ -105,7 +105,7 @@ export const listGoogleDrive = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     await ownedGoogleAccount(supabase as never, userId, data.accountId);
     const { getAccessToken, ensureRootFolder, listDriveFiles } =
-      await import("@/backend/services/google-drive.server");
+      await import("./google-drive.server");
     const token = await getAccessToken(data.accountId);
     const root = await ensureRootFolder(data.accountId, token);
     return { files: await listDriveFiles(token, root) };
@@ -146,7 +146,7 @@ export const uploadToGoogleDrive = createServerFn({ method: "POST" })
 
     await ownedGoogleAccount(supabase as never, userId, data.accountId);
     const { getAccessToken, ensureRootFolder, ensureFolderPath, uploadDriveFile } =
-      await import("@/backend/services/google-drive.server");
+      await import("./google-drive.server");
 
     try {
       const token = await getAccessToken(data.accountId);
@@ -203,7 +203,7 @@ export const renameStoredFile = createServerFn({ method: "POST" })
         .eq("user_id", userId)
         .maybeSingle();
       if (account?.provider === GOOGLE_PROVIDER_ID) {
-        const { getAccessToken, renameDriveFile } = await import("@/backend/services/google-drive.server");
+        const { getAccessToken, renameDriveFile } = await import("./google-drive.server");
         const token = await getAccessToken(file.account_id);
         await renameDriveFile(token, file.storage_key, data.name);
       }
@@ -244,7 +244,7 @@ export const moveStoredFile = createServerFn({ method: "POST" })
         .maybeSingle();
       if (account?.provider === GOOGLE_PROVIDER_ID) {
         const { getAccessToken, ensureRootFolder, ensureFolderPath, moveDriveFile } =
-          await import("@/backend/services/google-drive.server");
+          await import("./google-drive.server");
         const token = await getAccessToken(file.account_id);
         const root = await ensureRootFolder(file.account_id, token);
         const parent = await ensureFolderPath(token, root, folderPath);

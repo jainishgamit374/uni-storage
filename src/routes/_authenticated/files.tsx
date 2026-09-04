@@ -35,8 +35,8 @@ import { EmptyState } from "@/components/empty-state";
 import { HintTip } from "@/components/hint-tip";
 import { TableSkeleton } from "@/components/skeletons";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { deleteFile, getDownloadUrl } from "@/backend/api/nexdrive.functions";
-import { moveStoredFile, renameStoredFile } from "@/backend/api/google.functions";
+import { deleteFile, getDownloadUrl } from "@/lib/nexdrive.functions";
+import { moveStoredFile, renameStoredFile } from "@/lib/google.functions";
 import {
   Dialog,
   DialogContent,

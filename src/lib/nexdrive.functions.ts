@@ -2,8 +2,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { getProvider, defaultPolicy } from "@/backend/services/nexdrive.server";
-import { resolveProvider, type RoutableAccount, type RoutingPolicy } from "@/backend/shared/routing";
+import { getProvider, defaultPolicy } from "./nexdrive.server";
+import { resolveProvider, type RoutableAccount, type RoutingPolicy } from "./routing";
 import {
   NATIVE_MAX_BYTES,
   isRoutingMode,
@@ -12,7 +12,7 @@ import {
   sanitizeFileName,
   validateMimeType,
   validateSize,
-} from "@/backend/shared/validation";
+} from "./validation";
 
 const ACCOUNT_COLUMNS =
   "id, provider, label, is_mock, status, priority, quota_used, quota_total, config, created_at, external_email, needs_reauth";
@@ -306,7 +306,7 @@ export const deleteFile = createServerFn({ method: "POST" })
     if (file.storage_key && !file.is_mock) {
       try {
         if (account?.provider === "google-drive") {
-          const { getAccessToken, deleteDriveFile } = await import("@/backend/services/google-drive.server");
+          const { getAccessToken, deleteDriveFile } = await import("./google-drive.server");
           const token = await getAccessToken(file.account_id!);
           await deleteDriveFile(token, file.storage_key);
         } else {
@@ -354,7 +354,7 @@ export const getDownloadUrl = createServerFn({ method: "POST" })
         .maybeSingle();
       if (account?.provider === "google-drive") {
         const [{ signPayload }, { getRequest }] = await Promise.all([
-          import("@/backend/services/token-crypto.server"),
+          import("./token-crypto.server"),
           import("@tanstack/react-start/server"),
         ]);
         const origin = new URL(getRequest().url).origin;
@@ -446,7 +446,7 @@ export const disconnectAccount = createServerFn({ method: "POST" })
     if (!account) throw new Error("Account not found.");
 
     if (account.provider === "google-drive") {
-      const { deleteCredentials } = await import("@/backend/services/google-drive.server");
+      const { deleteCredentials } = await import("./google-drive.server");
       await deleteCredentials(account.id);
     }
 

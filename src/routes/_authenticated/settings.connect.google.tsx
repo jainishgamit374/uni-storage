@@ -10,7 +10,7 @@ import { AppShell } from "@/components/app-shell";
 import { ProviderGlyph } from "@/components/provider-glyph";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { googleOauthStatus, startGoogleConnect } from "@/backend/api/google.functions";
+import { googleOauthStatus, startGoogleConnect } from "@/lib/google.functions";
 
 export const Route = createFileRoute("/_authenticated/settings/connect/google")({
   head: () => ({
