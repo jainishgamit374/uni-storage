@@ -12,7 +12,7 @@ export const Route = createFileRoute("/api/public/drive/download")({
         const token = url.searchParams.get("t");
         if (!token) return new Response("Missing token", { status: 400 });
 
-        const { verifyPayload } = await import("@/lib/token-crypto.server");
+        const { verifyPayload } = await import("@/backend/services/token-crypto.server");
         const payload = verifyPayload<{ a: string; f: string; u: string; i: string; d?: string }>(token);
         if (!payload?.a || !payload?.f || !payload?.u || !payload?.i) {
           return new Response("This download link is invalid or has expired.", { status: 403 });
@@ -35,7 +35,7 @@ export const Route = createFileRoute("/api/public/drive/download")({
         }
 
         try {
-          const { getAccessToken, downloadDriveFile } = await import("@/lib/google-drive.server");
+          const { getAccessToken, downloadDriveFile } = await import("@/backend/services/google-drive.server");
           const accessToken = await getAccessToken(payload.a);
           const file = await downloadDriveFile(accessToken, payload.f);
           return new Response(file.stream, {

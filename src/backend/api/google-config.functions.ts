@@ -33,7 +33,7 @@ export const getGoogleOauthConfig = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertAdmin(context as never);
-    const { googleConfig, defaultRedirectUri } = await import("./google-drive.server");
+    const { googleConfig, defaultRedirectUri } = await import("@/backend/services/google-drive.server");
     const config = await googleConfig();
     const origin = originFromRequest();
     return {
@@ -60,8 +60,8 @@ export const saveGoogleOauthConfig = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertAdmin(context as never);
     const [{ encryptToken }, { defaultRedirectUri }, { supabaseAdmin }] = await Promise.all([
-      import("./token-crypto.server"),
-      import("./google-drive.server"),
+      import("@/backend/services/token-crypto.server"),
+      import("@/backend/services/google-drive.server"),
       import("@/integrations/supabase/client.server"),
     ]);
     const redirect = data.redirectUri || defaultRedirectUri(originFromRequest());

@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import type { RoutableAccount, RoutingPolicy } from "./routing";
+import type { RoutableAccount, RoutingPolicy } from "@/backend/shared/routing";
 
 export const BUCKET = "nexdrive";
 
@@ -70,7 +70,7 @@ class GoogleDriveProvider extends StorageProvider {
     super(accountId, "google-drive");
   }
   async getQuota() {
-    const { getAccessToken, getDriveQuota } = await import("./google-drive.server");
+    const { getAccessToken, getDriveQuota } = await import("@/backend/services/google-drive.server");
     const token = await getAccessToken(this.accountId);
     const { used, total } = await getDriveQuota(token);
     return { used, total };
@@ -81,7 +81,7 @@ class GoogleDriveProvider extends StorageProvider {
   }
   async list(folderPath = "/") {
     const { getAccessToken, ensureRootFolder, ensureFolderPath, listDriveFiles } =
-      await import("./google-drive.server");
+      await import("@/backend/services/google-drive.server");
     const token = await getAccessToken(this.accountId);
     const root = await ensureRootFolder(this.accountId, token);
     const folder = await ensureFolderPath(token, root, folderPath);
@@ -89,7 +89,7 @@ class GoogleDriveProvider extends StorageProvider {
   }
   async upload(params: { name: string; mimeType: string; folderPath: string; body: ArrayBuffer }) {
     const { getAccessToken, ensureRootFolder, ensureFolderPath, uploadDriveFile } =
-      await import("./google-drive.server");
+      await import("@/backend/services/google-drive.server");
     const token = await getAccessToken(this.accountId);
     const root = await ensureRootFolder(this.accountId, token);
     const parent = await ensureFolderPath(token, root, params.folderPath);
@@ -106,19 +106,19 @@ class GoogleDriveProvider extends StorageProvider {
     return null;
   }
   async rename(fileId: string, name: string) {
-    const { getAccessToken, renameDriveFile } = await import("./google-drive.server");
+    const { getAccessToken, renameDriveFile } = await import("@/backend/services/google-drive.server");
     await renameDriveFile(await getAccessToken(this.accountId), fileId, name);
   }
   async move(fileId: string, folderPath: string) {
     const { getAccessToken, ensureRootFolder, ensureFolderPath, moveDriveFile } =
-      await import("./google-drive.server");
+      await import("@/backend/services/google-drive.server");
     const token = await getAccessToken(this.accountId);
     const root = await ensureRootFolder(this.accountId, token);
     const parent = await ensureFolderPath(token, root, folderPath);
     await moveDriveFile(token, fileId, parent);
   }
   async deleteObject(fileId: string) {
-    const { getAccessToken, deleteDriveFile } = await import("./google-drive.server");
+    const { getAccessToken, deleteDriveFile } = await import("@/backend/services/google-drive.server");
     await deleteDriveFile(await getAccessToken(this.accountId), fileId);
   }
   cachedQuota() {

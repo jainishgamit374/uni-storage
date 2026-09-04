@@ -1,5 +1,5 @@
-import { decryptToken, encryptToken } from "./token-crypto.server";
-import { escapeDriveQueryLiteral, normalizeFolderPath } from "./validation";
+import { decryptToken, encryptToken } from "@/backend/services/token-crypto.server";
+import { escapeDriveQueryLiteral, normalizeFolderPath } from "@/backend/shared/validation";
 
 /** Server-only Google Drive adapter + OAuth plumbing. */
 
