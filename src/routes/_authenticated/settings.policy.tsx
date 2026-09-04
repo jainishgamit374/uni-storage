@@ -16,7 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { updatePolicy } from "@/lib/nexdrive.functions";
+import { updatePolicy } from "@/backend/api/nexdrive.functions";
 import { ROUTING_MODES, type FolderRule, type TypeRule } from "@/lib/providers";
 import { cn } from "@/lib/utils";
 import { useOverview, useRefreshOverview } from "@/lib/use-overview";

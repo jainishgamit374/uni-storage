@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 
-import { getOverview } from "./nexdrive.functions";
+import { getOverview } from "@/backend/api/nexdrive.functions";
 
 export type Overview = Awaited<ReturnType<typeof getOverview>>;
 export type Account = Overview["accounts"][number];

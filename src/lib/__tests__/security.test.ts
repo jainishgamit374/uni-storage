@@ -11,7 +11,7 @@ import {
   sanitizeFileName,
   validateMimeType,
   validateSize,
-} from "../validation";
+} from "@/backend/shared/validation";
 
 describe("folder path validation", () => {
   it("normalises ordinary paths", () => {
